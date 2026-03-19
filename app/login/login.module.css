@@ -1,0 +1,233 @@
+.loginContainer {
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  overflow: hidden;
+}
+
+.loginBackground {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginWrapper {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+.loginCard {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+}
+
+.starsSmall {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 10% 20%, #ffffff, transparent),
+    radial-gradient(1.5px 1.5px at 30% 50%, #b91010, transparent),
+    radial-gradient(2px 2px at 70% 80%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90% 10%, #fff, transparent);
+  background-size: 300px 300px; /* Diulang setiap 300px */
+  opacity: 0.4;
+  animation: twinkle 5s infinite;
+}
+
+.starsLayerSmall,
+.starsLayerMedium {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.starsLayerSmall {
+  background-image: radial-gradient(2px 2px at center, #fff, rgba(0, 0, 0, 0));
+  background-size: 100px 100px;
+  opacity: 0.3;
+  animation: starsScroll 30s linear infinite;
+}
+
+.starsLayerMedium {
+  background-image: radial-gradient(2.5px 2.5px at center, #fff, rgba(0, 0, 0, 0));
+  background-size: 250px 250px;
+  opacity: 0.2;
+  animation: starsScroll 60s linear infinite;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.loginTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.loginSubtitle {
+  color: #a3a3a3;
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputGroup input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 14px 14px 48px;
+  border-radius: 12px;
+  color: #fff;
+  transition: 0.3s;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: #c2baca;
+  background: rgba(59, 56, 61, 0.05);
+}
+
+.icon {
+  position: absolute;
+  left: 16px;
+  color: #6b7280;
+}
+
+.loginBtn {
+  background: #d1c0c0;
+  color: #000;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  border: none;
+  margin-top: 20px;
+}
+
+.loginBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+}
+
+.githubBtn {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.divider {
+  text-align: center;
+  margin: 24px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+  background: #0d0d0d;
+  /* Menutup garis divider */
+  padding: 0 10px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  position: relative;
+}
+
+.footerText {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.footerText a {
+  color: #999898;
+  text-decoration: none;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes pulseOrange {
+  0% { 
+    opacity: 0.4; 
+    transform: scale(1) translateY(0); 
+  }
+  100% { 
+    opacity: 0.7; 
+    transform: scale(1.1) translateY(-20px); 
+  }
+}
+
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  to { transform: translate(5%, 5%) scale(1.2); opacity: 0.8; }
+}
+
+@keyframes starsScroll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-100vh);
+  }
+}

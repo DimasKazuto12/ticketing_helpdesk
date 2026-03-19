@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  closed
+}
+
+enum Priority {
+  low
+  medium
+  high
+}
+
+enum SenderType {
+  admin
+  client
+}
+
+model User {
+  id         Int            @id @default(autoincrement())
+  name       String
+  email      String         @unique
+  password   String
+  role       UserRole       @default(admin)
+  createdAt  DateTime       @default(now()) @map("created_at")
+  replies    TicketReply[]
+
+  @@map("users")
+}
+
+model Category {
+  id           Int      @id @default(autoincrement())
+  categoryName String   @map("category_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  tickets      Ticket[]
+
+  @@map("categories")
+}
+
+model Ticket {
+  id          Int          @id @default(autoincrement())
+  ticketCode  String       @unique @map("ticket_code")
+  clientName  String       @map("client_name")
+  clientEmail String       @map("client_email")
+  categoryId  Int          @map("category_id")
+  title       String
+  description String       @db.Text
+  attachment  String?
+  status      TicketStatus @default(open)
+  priority    Priority     @default(low)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  category      Category      @relation(fields: [categoryId], references: [id])
+  replies       TicketReply[]
+  aiSuggestions AiSuggestion?
+
+  @@map("tickets")
+}
+
+model TicketReply {
+  id         Int        @id @default(autoincrement())
+  ticketId   Int        @map("ticket_id")
+  userId     Int?       @map("user_id")
+  senderType SenderType @map("sender_type")
+  message    String     @db.Text
+  attachment  String?    @db.Text
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@map("ticket_replies")
+}
+
+model AiSuggestion {
+  id                 Int      @id @default(autoincrement())
+  ticketId           Int      @unique @map("ticket_id")
+  aiSummary          String   @db.Text @map("ai_summary")
+  aiSuggestedCategory String  @map("ai_suggested_category")
+  aiSuggestedPriority Priority @map("ai_suggested_priority")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ai_suggestions")
+}

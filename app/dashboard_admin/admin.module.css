@@ -1,0 +1,46 @@
+.animate-shimmer {
+  animation: shimmer 1.5s infinite linear;
+}
+
+.animate-spin-slow {
+  animation: spin 3s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  .animate-scan {
+    position: absolute;
+    width: 100%;
+    animation: scan-loop 2s linear infinite;
+  }
+
+  @keyframes scan-loop {
+    0% {
+      top: 0%;
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    90% {
+      opacity: 1;
+    }
+
+    100% {
+      top: 100%;
+      opacity: 0;
+    }
+  }
+  
+}

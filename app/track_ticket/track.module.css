@@ -1,0 +1,214 @@
+.background {
+  background-color: #000;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 450px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2.5rem;
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  z-index: 10;
+}
+
+.starsLayerSmall,
+.starsLayerMedium,
+.starsLayerLarge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  /* Hanya di area hero section */
+  pointer-events: none;
+}
+
+.starsLayerSmall {
+  z-index: 1;
+  background-image: radial-gradient(3px 3px at center, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 150px 150px;
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  opacity: 0.2;
+  animation: starsScroll 30s linear infinite;
+}
+
+.starsLayerMedium {
+  z-index: 2;
+  background-image: radial-gradient(4px 4px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 250px 250px;
+  opacity: 0.3;
+  animation: starsScroll 60s linear infinite;
+}
+
+.starsLayerLarge {
+  z-index: 3;
+  background-image: radial-gradient(5px 5px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 400px 400px;
+  opacity: 0.15;
+  animation: starsScroll 90s linear infinite;
+}
+
+.inputField {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.8rem 1rem 0.8rem 3rem; /* Padding kiri untuk ikon search */
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.inputField:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.inputField::placeholder {
+  letter-spacing: normal;
+  color: #3f3f46;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.9rem;
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.submitBtn:hover {
+  background: #d4d4d8;
+  transform: translateY(-2px);
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes starsScroll {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 2rem; /* Kurangi padding agar tidak sesak */
+    width: 92%;      /* Card tidak mentok ke pinggir layar */
+    border-radius: 20px;
+    margin-top: 2rem; /* Beri ruang untuk tombol back */
+  }
+
+  /* Perbaikan Bintang agar tidak terlihat kotak di HP */
+  .starsLayerSmall {
+    background-size: 100px 100px;
+    box-shadow: 50px 100px #fff, 200px 300px #fff, 150px 400px #fff;
+    opacity: 0.1; /* Dibuat lebih tipis agar halus */
+  }
+
+  .starsLayerMedium {
+    background-size: 150px 150px;
+    box-shadow: 100px 200px #fff, 300px 100px #fff;
+    opacity: 0.15;
+  }
+
+  /* Perkecil Header */
+  .card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 12px;
+  }
+
+  /* Rapikan Input Field agar jempol gampang ngetik */
+  .inputField {
+    padding: 0.7rem 1rem 0.7rem 2.8rem;
+    font-size: 14px; /* Mencegah zoom otomatis di beberapa browser mobile */
+    letter-spacing: 0.05em;
+  }
+
+  .submitBtn {
+    padding: 0.8rem;
+    font-size: 14px;
+    margin-top: 1.2rem;
+  }
+
+  /* Memastikan animasi tidak berat di Android */
+  .starsLayerSmall, .starsLayerMedium, .starsLayerLarge {
+    animation-duration: 40s; /* Diperlambat sedikit agar tidak lag */
+  }
+
+  .background :global([data-sonner-toaster]) {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important; /* Gunakan persentase agar lebih fleksibel */
+    max-width: 350px !important; /* Jangan biarkan terlalu lebar di HP besar */
+    top: 20px !important;
+  }
+
+  /* Mengatur tampilan kartu toast agar ramping */
+  .background :global(.my-custom-toast) {
+    width: 100% !important;
+    min-width: 0 !important; /* Menghapus batasan lebar minimum bawaan */
+    padding: 10px 14px !important; /* Padding lebih rapat */
+  }
+
+  /* Mengecilkan ikon jika ada */
+  .background :global([data-icon]) {
+    margin-right: 8px !important;
+    transform: scale(0.9);
+  }
+
+  /* Teks Judul */
+  .background :global([data-sonner-toast] [data-title]) {
+    font-size: 12px !important;
+    line-height: 1.2;
+  }
+
+  /* Teks Deskripsi */
+  .background :global([data-sonner-toast] [data-description]) {
+    font-size: 10px !important;
+    margin-top: 1px;
+    opacity: 0.8;
+  }
+}

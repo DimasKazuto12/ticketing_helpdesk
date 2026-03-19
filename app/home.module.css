@@ -1,0 +1,783 @@
+.container {
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 5%;
+  margin: 0 auto;
+  width: 100%;
+  position: fixed;
+  z-index: 1000;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.background {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 30%, transparent 70%, #000 100%),
+    url("/image/milky-way.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.background::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  /* Membuat titik-titik putih kecil menggunakan radial-gradient */
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 50px 160px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 80px 120px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 110px 210px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 150px 250px, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 200px 200px;
+  opacity: 0.3;
+  animation: starsTwinkle 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.iconContainer {
+  width: 170px;
+  height: 170px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navIcon {
+  width: 100%;
+  height: 100%;
+}
+
+.navLink {
+  color: #e7e7e7;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.navLink:hover {
+  color: #fff;
+  filter: drop-shadow(0 0 8px rgb(248, 248, 248));
+  font-size: 15px;
+}
+
+.starsLayerSmall,
+.starsLayerMedium,
+.starsLayerLarge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  /* Hanya di area hero section */
+  pointer-events: none;
+}
+
+.starsLayerSmall {
+  z-index: 1;
+  background-image: radial-gradient(3px 3px at center, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 150px 150px;
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  opacity: 0.2;
+  animation: starsScroll 30s linear infinite;
+}
+
+.starsLayerMedium {
+  z-index: 2;
+  background-image: radial-gradient(4px 4px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 250px 250px;
+  opacity: 0.3;
+  animation: starsScroll 60s linear infinite;
+}
+
+.starsLayerLarge {
+  z-index: 3;
+  background-image: radial-gradient(5px 5px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 400px 400px;
+  opacity: 0.15;
+  animation: starsScroll 90s linear infinite;
+}
+
+.konten {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  padding: 120px 20px 60px;
+  min-height: 70vh;
+  margin-top: 50px;
+  z-index: 10;
+}
+
+.title {
+  font-size: clamp(28px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 3rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: clamp(14px, 4vw, 18px);
+  color: #a3a3a3;
+  max-width: 36rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.benefitsSection {
+  max-width: 80rem;
+  margin: 100px auto;
+  padding: 0 2rem;
+  position: relative;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+.benefitCard {
+  background: rgba(255, 255, 255, 0.03); /* Hitam transparan transparan */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Border putih tipis */
+  padding: 3rem 2rem;
+  border-radius: 30px; /* Radius besar agar modern */
+  backdrop-filter: blur(10px); /* Efek buram pada background */
+  
+  /* TAMBAHKAN PREFIX: Dukungan untuk Safari */
+  -webkit-backdrop-filter: blur(10px); 
+  
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.benefitCard:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-8px);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8); /* Shadow besar agar menonjol */
+}
+
+.iconWrapper {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1); /* Latar ikon transparan putih */
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.iconGlowBody {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  filter: blur(15px);
+  z-index: 1; /* Di bawah ikon */
+}
+
+.benefitCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.benefitCard p {
+  color: #9ca3af; /* Abu-abu terang */
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.parallaxSection {
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  padding: 4rem 0;
+}
+
+.parallaxWindow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.parallaxElement {
+  position: absolute;
+  top: 20%;
+  left: 25%;
+  width: 50%;
+  z-index: 2;
+}
+
+.parallaxElement img {
+  width: 100%;
+  height: auto;
+  mix-blend-mode: screen; 
+}
+
+.customDimension {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  z-index: 1;
+}
+
+.nebulaSpotWhite {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(rgba(230, 223, 223, 0.205), transparent);
+  filter: blur(80px);
+}
+
+.nebulaSpotBlue {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(rgba(13, 36, 167, 0.445), transparent);
+  filter: blur(100px);
+}
+
+.starsPattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  /* Menggunakan multiple layers untuk kedalaman visual */
+  background-image:
+    /* Layer 1: Bintang Putih Kecil (Tajam) */
+    radial-gradient(3px 3px at 25px 35px, #ffffff, transparent),
+    radial-gradient(3px 3px at 150px 250px, #ffffff, transparent),
+
+    /* Layer 2: Bintang Kuning Gading (Soft) */
+    radial-gradient(3.5px 3.5px at 60px 120px, #fff8e1, transparent),
+    radial-gradient(3.5px 3.5px at 280px 70px, #fff8e1, transparent),
+
+    /* Layer 3: Bintang Biru Muda (Teknologi) */
+    radial-gradient(4px 4px at 110px 190px, #e1f5fe, transparent);
+
+  background-size: 250px 250px, 250px 250px, 350px 350px, 350px 350px, 450px 450px;
+  opacity: 0.4;
+  z-index: 1;
+  /* Tambahkan animasi kerlip lembut */
+  animation: starsTwinkle 4s ease-in-out infinite alternate;
+}
+
+.parallaxContent {
+  position: absolute;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 40%);
+}
+
+.shootingStarSmall,
+.shootingStarMedium,
+.shootingStarLarge {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: rain 4s linear infinite;
+}
+
+.shootingStar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, #fff, transparent);
+}
+
+.shootingStarSmall {
+  width: 1px;
+  height: 1px;
+  /* Setiap koordinat box-shadow adalah 1 bintang baru */
+  box-shadow:
+    -100px 200px #fff, -300px 500px #fff, -500px 100px #fff,
+    -700px 400px #fff, -900px 250px #fff, -1100px 600px #fff;
+  animation-duration: 2s;
+}
+
+.shootingStarMedium {
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    -200px 400px #fff, -600px 200px #fff, -1000px 500px #fff;
+  animation-duration: 4s;
+  animation-delay: 1s;
+}
+
+.shootingStarLarge {
+  width: 4px;
+  height: 4px;
+  box-shadow: -400px 300px #fff, -800px 150px #fff;
+  animation-duration: 6s;
+  animation-delay: 2s;
+}
+
+.shootingStarSmall::before,
+.shootingStarMedium::before,
+.shootingStarLarge::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, #fff, transparent);
+}
+
+.shootingStarSmall::before {
+  width: 50px;
+  height: 1px;
+}
+
+.shootingStarMedium::before {
+  width: 100px;
+  height: 1px;
+}
+
+.shootingStarLarge::before {
+  width: 150px;
+  height: 2px;
+}
+
+.twinklingStar {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+  animation: pulse 3s infinite;
+}
+
+.testiSection {
+  max-width: 80rem;
+  margin: 100px auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+.testiHeader {
+  margin-bottom: 3rem;
+}
+
+.testiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.testiCard {
+  background: rgba(255, 255, 255, 0.03);
+  /* Hitam transparan transparan */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Border putih tipis */
+  padding: 2rem;
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  text-align: left;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.testiCard:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-10px);
+}
+
+/* Efek cahaya putih di pojok kartu saat hover */
+.testiCard::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.testiCard:hover::after {
+  opacity: 1;
+}
+
+.testiText {
+  color: #d1d5db;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.testiUser {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userAvatar {
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: #111;
+  flex-shrink: 0;
+  filter: grayscale(100%) contrast(1.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.testiCard:hover .userAvatar {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.modernFooter {
+  width: 100%;
+  background: linear-gradient(to top, #000 70%, transparent);
+  position: relative;
+}
+
+.footerGlowLine {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.footerMainContent {
+  width: 100%;
+  max-width: 100%; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  padding: 0 5%;
+  padding-right: 8%;
+}
+
+.footerLogoImg {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+  display: block;
+}
+
+.footerTagline {
+  font-size: 10px;
+  color: #3f3f46;
+  letter-spacing: 0.4em;
+  margin-left: 42px;
+  font-weight: 800;
+}
+
+.footerSocial {
+  display: flex;
+  gap: 32px; /* Jarak antar ikon yang pas */
+}
+
+.socialLink {
+  color: #52525b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.socialLink:hover {
+  color: #fff;
+  transform: translateY(-4px);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.footerBottomStrip {
+  width: 100%;
+  max-width: 100%;
+  margin: 24px auto 0;
+  padding: 0 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: #27272a;
+  letter-spacing: 0.2em;
+}
+
+.footerBottomStrip .copyright {
+  margin-left: 42px;
+}
+
+.systemStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3f3f46;
+}
+
+.statusPulse {
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #fff;
+  animation: pulseLight 2s infinite;
+}
+
+.legalLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.legalLinks span:hover {
+  color: #fff;
+  cursor: pointer;
+}
+
+@keyframes pulseLight {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+
+@keyframes starsTwinkle {
+  0% {
+    opacity: 0.3;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0.3;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes starsTwinkle {
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes starsScroll {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes rain {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotate(315deg) translateX(-1500px);
+    opacity: 0;
+  }
+}
+
+/* --- MEDIA QUERIES UNTUK ANDROID / MOBILE (Max-Width 768px) --- */
+@media (max-width: 768px) {
+  
+  .nav {
+    padding: 0 1.5rem;
+    height: 60px;
+    justify-content: space-between;
+  }
+
+  .nav div.hidden.md\:flex {
+    display: none
+  }
+
+  .iconContainer {
+    width: 100px;
+    height: 100px;
+  }
+
+  .nav .flex.items-center.gap-4 {
+    gap: 0.75rem;
+  }
+
+  .konten {
+    padding-top: 100px; 
+    padding: 100px 1.5rem 40px;
+    margin-top: 20px;
+    min-height: auto;
+  }
+
+  .title {
+    font-size: 32px;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    margin-top: 9vw;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    margin-bottom: 2rem;
+  }
+
+  .benefitsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .benefitCard {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .parallaxSection {
+    height: 50vh;
+    padding: 2rem 0;
+  }
+
+  .parallaxElement {
+    left: 14%;
+    width: 80%;
+  }
+
+  .testiGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .testiCard {
+    padding: 1.5rem;
+  }
+
+  .footerMainContent {
+    padding: 40px;
+    padding-left: 0;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .footerTagline {
+    font-size: 9px;
+  }
+
+  .footerSocial {
+    gap: 24px;
+    margin-bottom: 2vw;
+  }
+
+  .footerBottomStrip {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-bottom: 30px;
+    text-align: center;
+  }
+
+  .legalLinks {
+    justify-content: center;
+  }
+}
+
+/* --- OPTIMALISASI KHUSUS LAYAR SANGAT KECIL (Max-Width 480px) --- */
+@media (max-width: 480px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .navLink {
+    font-size: 12px;
+  }
+
+  .iconContainer {
+    width: 100px;
+  }
+}

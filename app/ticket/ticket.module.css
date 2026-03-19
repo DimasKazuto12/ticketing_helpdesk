@@ -1,0 +1,313 @@
+.background {
+  background: #000;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.glassCard {
+  width: 100%;
+  max-width: 550px; /* Lebih lebar agar muat 2 kolom */
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px;
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  margin-top: 10px;
+}
+
+.inputBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputBox label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding-left: 4px;
+}
+
+.inputBox input, 
+.inputBox select, 
+.inputBox textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.inputBox input:focus, 
+.inputBox select:focus, 
+.inputBox textarea:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fileButton label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a1a1aa;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: 0.3s;
+}
+
+/* Custom Select Container */
+.customSelect {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 42px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.customSelect.active {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Dropdown List */
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 50;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Individual Dropdown Items */
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #a1a1aa;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.dropdownItem:hover span {
+  color: #fff;
+}
+
+
+
+.fileButton label:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.btnSubmit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+.btnSubmit:hover {
+  background: #d4d4d8;
+  transform: translateY(-1px);
+}
+
+.starsLayerSmall,
+.starsLayerMedium,
+.starsLayerLarge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  /* Hanya di area hero section */
+  pointer-events: none;
+}
+
+.starsLayerSmall {
+  z-index: 1;
+  background-image: radial-gradient(3px 3px at center, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 150px 150px;
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  opacity: 0.2;
+  animation: starsScroll 30s linear infinite;
+}
+
+.starsLayerMedium {
+  z-index: 2;
+  background-image: radial-gradient(4px 4px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 250px 250px;
+  opacity: 0.3;
+  animation: starsScroll 60s linear infinite;
+}
+
+.starsLayerLarge {
+  z-index: 3;
+  background-image: radial-gradient(5px 5px at center, #ffffff, rgba(0, 0, 0, 0));
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
+  background-size: 400px 400px;
+  opacity: 0.15;
+  animation: starsScroll 90s linear infinite;
+}
+
+.fileButton {
+  display: flex;
+  align-items: center;
+}
+
+.fileButton label {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 99px;
+  color: #a1a1aa;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.fileButton label:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes starsScroll {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+@media (max-width: 640px) {
+  .glassCard {
+    padding: 20px 20px;
+    margin-top: 40px; /* Memberi ruang untuk tombol back di atas */
+    margin: 30px;
+  }
+  
+  .btnSubmit {
+    width: 100%; /* Tombol submit full width di HP agar mudah ditekan jempol */
+    justify-content: center;
+  }
+
+  /* Jika ada attachment dan tombol submit sejajar, buat jadi tumpuk */
+  .flex.items-center.gap-4.pt-2 {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .starsLayerSmall {
+    width: 3px; /* Perkecil lagi di HP */
+    height: 3px;
+    box-shadow: 0 0 5px white;
+  }
+
+  .starsLayerMedium {
+    width: 4px;
+    height: 4px;
+    opacity: 0.6;
+  }
+
+  .starsLayerLarge {
+    width: 5px;
+    height: 5px;
+    opacity: 0.4;
+    filter: blur(1px); /* Beri sedikit blur agar tidak tajam kotaknya */
+  }
+
+  .background :global([data-sonner-toaster]) {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important; /* Gunakan persentase agar lebih fleksibel */
+    max-width: 350px !important; /* Jangan biarkan terlalu lebar di HP besar */
+    top: 20px !important;
+  }
+
+  /* Mengatur tampilan kartu toast agar ramping */
+  .background :global(.my-custom-toast) {
+    width: 100% !important;
+    min-width: 0 !important; /* Menghapus batasan lebar minimum bawaan */
+    padding: 10px 14px !important; /* Padding lebih rapat */
+  }
+
+  /* Mengecilkan ikon jika ada */
+  .background :global([data-icon]) {
+    margin-right: 8px !important;
+    transform: scale(0.9);
+  }
+
+  /* Teks Judul */
+  .background :global([data-sonner-toast] [data-title]) {
+    font-size: 12px !important;
+    line-height: 1.2;
+  }
+
+  /* Teks Deskripsi */
+  .background :global([data-sonner-toast] [data-description]) {
+    font-size: 10px !important;
+    margin-top: 1px;
+    opacity: 0.8;
+  }
+}
