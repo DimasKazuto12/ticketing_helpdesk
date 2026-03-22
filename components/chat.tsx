@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Terminal, Paperclip, X, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, X } from 'lucide-react';
 import styles from '../app/results/[code]/results.module.css';
+import VoiceController from './VoiceController';
 
 interface ChatInterfaceProps {
     ticketId: number;
@@ -18,16 +19,21 @@ export default function ChatInterface({
     aiSummary,
     ticketStatus
 }: ChatInterfaceProps) {
-
     const [attachment, setAttachment] = useState<string | null>(null);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null); // Untuk Zoom
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [message, setMessage] = useState('');
     const [replies, setReplies] = useState(existingReplies);
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    
+    // SOLUSI HYDRATION: State untuk mengecek apakah sudah di client
+    const [isMounted, setIsMounted] = useState(false);
 
-    // Auto-scroll ke bawah saat ada pesan baru
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -45,7 +51,7 @@ export default function ChatInterface({
                 body: JSON.stringify({
                     ticketId,
                     message: message || "Sent an attachment",
-                    attachment, // Kirim base64 ke API
+                    attachment,
                     sender: 'USER'
                 }),
             });
@@ -54,7 +60,7 @@ export default function ChatInterface({
                 const data = await response.json();
                 setReplies([...replies, data]);
                 setMessage('');
-                setAttachment(null); // Reset gambar setelah kirim
+                setAttachment(null);
             }
         } catch (err) {
             console.error("Failed to send:", err);
@@ -66,7 +72,7 @@ export default function ChatInterface({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) { // Limit 2MB
+            if (file.size > 2 * 1024 * 1024) {
                 alert("File too large! Max 2MB.");
                 return;
             }
@@ -78,57 +84,72 @@ export default function ChatInterface({
         }
     };
 
-    // Update handleSend untuk menyertakan attachment
-
     return (
         <section className={styles.chatStream}>
-            <div className={styles.streamHeader}>
-                <div className={styles.nodeIconBox}><Send size={18} /></div>
-                <div className={styles.nodeHeaderText}>
-                    <span className={styles.nodeTitle}>Communication Node</span>
-                </div>
-            </div>
-
-            {/* Tambahkan ref untuk auto-scroll dan hilangkan scrollbar via CSS sebelumnya */}
             <div className={styles.logContainer} ref={scrollRef}>
+                
+                {/* 1. NEURAL ANALYSIS (AI) */}
                 {aiSummary && (
-                    <div className={styles.bubbleAdmin} style={{ marginTop: '-15px', borderStyle: 'dashed' }}>
-                        <span className={styles.bubbleLabelAdmin} style={{ color: '#3b82f6' }}>NEURAL_ANALYSIS_CORE</span>
-                        <p className={styles.bubbleText} style={{ opacity: 0.8 }}>{aiSummary}</p>
+                    <div className="flex w-full mb-4 justify-start">
+                        <div className="max-w-[80%] p-3 rounded-lg shadow-lg border border-dashed border-blue-500/50 bg-blue-600/10 transition-all">
+                            <div className="flex justify-between items-start mb-1 gap-4">
+                                <span className="text-[10px] uppercase text-blue-400 tracking-wider font-bold">NEURAL_ANALYSIS_CORE</span>
+                                <VoiceController textToSpeak={aiSummary} />
+                            </div>
+                            <p className="text-sm text-zinc-100 leading-relaxed opacity-90">{aiSummary}</p>
+                        </div>
                     </div>
                 )}
 
-                <div className={styles.bubbleClient}>
-                    <span className={styles.bubbleLabel}>CLIENT_INITIAL_REQUEST</span>
-                    <p className={styles.bubbleText}>"{initialDescription}"</p>
-                </div>
-
+                {/* 3. REPLIES MAPPING */}
                 {replies.map((r, i) => (
-                    <div key={i} className={r.senderType === 'client' ? styles.bubbleClient : styles.bubbleAdmin}>
-                        <span className={r.senderType === 'client' ? styles.bubbleLabel : styles.bubbleLabelAdmin}>
-                            {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
-                        </span>
-                        <p className={styles.bubbleText}>{r.message}</p>
+                    <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${
+                            r.senderType === 'client'
+                                ? 'bg-zinc-800/50 border border-zinc-700/50'
+                                : 'bg-blue-600/20 border border-blue-500/30'
+                        }`}>
+                            <p className="text-[10px] uppercase opacity-50 mb-1 tracking-wider font-bold">
+                                {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
+                            </p>
 
-                        {/* TAMPILKAN GAMBAR JIKA ADA */}
-                        {r.attachment && (
-                            <div className="mt-2 border border-zinc-700 rounded overflow-hidden">
-                                <img
-                                    src={r.attachment}
-                                    alt="attachment"
-                                    className="max-w-[200px] cursor-pointer hover:opacity-80 transition-opacity"
-                                    onClick={() => setSelectedImage(r.attachment)}
-                                />
-                            </div>
-                        )}
+                            {r.attachment && (
+                                <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/20">
+                                    <img
+                                        src={r.attachment}
+                                        alt="Neural Attachment"
+                                        className="max-w-full h-auto max-h-[300px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                        onClick={() => setSelectedImage(r.attachment)}
+                                    />
+                                </div>
+                            )}
+
+                            {r.message && (
+                                <p className="text-sm text-zinc-100 leading-relaxed break-words">
+                                    {r.message}
+                                </p>
+                            )}
+
+                            {/* TIMESTAMP DENGAN FIX HYDRATION */}
+                            <p 
+                                suppressHydrationWarning
+                                className="text-[8px] mt-2 opacity-30 text-right font-mono"
+                            >
+                                {isMounted ? new Date(r.createdAt || Date.now()).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : '--:--'}
+                            </p>
+                        </div>
                     </div>
                 ))}
             </div>
 
+            {/* INPUT SECTION */}
             <div className={styles.inputWrapper}>
                 {attachment && (
                     <div className="mb-2 flex items-center gap-2 p-2 bg-zinc-900 border border-zinc-700 rounded w-fit">
-                        <img src={attachment} className="h-10 w-10 object-cover rounded" />
+                        <img src={attachment} className="h-10 w-10 object-cover rounded" alt="preview" />
                         <span className="text-xs text-zinc-400">image_payload.dat</span>
                         <button onClick={() => setAttachment(null)} className="text-red-500"><X size={14} /></button>
                     </div>
@@ -157,25 +178,26 @@ export default function ChatInterface({
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                        className="bg-transparent border-none outline-none text-zinc-100 placeholder-zinc-600 flex-1"
                         disabled={ticketStatus === 'closed'}
                     />
 
                     <button
                         className={styles.sendButtonActive}
                         onClick={handleSend}
-                        disabled={isLoading || !message.trim() || ticketStatus === 'closed'}
-                        style={{ opacity: (message.trim() && ticketStatus !== 'closed') ? 1 : 0.5 }}
-
+                        disabled={isLoading || (!message.trim() && !attachment) || ticketStatus === 'closed'}
+                        style={{ opacity: (message.trim() || attachment) && ticketStatus !== 'closed' ? 1 : 0.5 }}
                     >
                         <Send size={18} />
                     </button>
                 </div>
             </div>
 
+            {/* MODAL ZOOM */}
             {selectedImage && (
                 <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 p-4" onClick={() => setSelectedImage(null)}>
                     <div className="relative animate-in zoom-in-95 duration-200">
-                        <img src={selectedImage} className="max-h-[85vh] max-w-full rounded-lg shadow-2xl border border-zinc-800" />
+                        <img src={selectedImage} className="max-h-[85vh] max-w-full rounded-lg shadow-2xl border border-zinc-800" alt="zoom" />
                     </div>
                 </div>
             )}

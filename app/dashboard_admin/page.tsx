@@ -15,6 +15,7 @@ import "./admin.module.css"
 import { useRouter } from "next/navigation";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import VoiceController from '@/components/VoiceController'
 
 interface ChatMessage {
     role: 'user' | 'admin';
@@ -671,31 +672,34 @@ export default function AdminDashboard() {
                     <div className="relative w-full max-w-5xl h-full bg-[#050505] border-l border-zinc-800 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-row animate-in slide-in-from-right duration-500">
 
                         <div className="flex-1 flex flex-col border-r border-zinc-900 bg-black/20">
-                            {/* Header Chat */}
-                            <div className="p-8 border-b border-zinc-900 flex items-center gap-4 bg-black/40">
-                                <div className="w-12 h-12 bg-blue-600/10 border border-blue-600/20 rounded-2xl flex items-center justify-center text-blue-500">
-                                    <MessageSquare size={24} />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-white tracking-tighter">Communication Node</h2>
-                                    <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-0.5">Status: Secure Channel</p>
-                                </div>
-                            </div>
-
                             {/* Area Bubble Chat (Scrollable) */}
                             <div className="flex-1 overflow-y-auto p-8 space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 {/* Pesan Awal User */}
-                                <div className="flex justify-start">
-                                    <div className="max-w-[85%] bg-zinc-900/40 border border-zinc-800 p-4 rounded-2xl rounded-tl-none">
-                                        <p className="text-[10px] font-bold text-blue-500 uppercase mb-1 tracking-tighter">Client_Request</p>
-                                        <p className="text-sm text-zinc-300 leading-relaxed italic">"{selectedTicket.description}"</p>
+                                {selectedTicket?.aiSuggestions && (
+                                    <div className="mb-6 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 border-dashed relative group">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">
+                                                    Neural Analysis Core
+                                                </span>
+                                            </div>
+
+                                            {/* Masukkan VoiceController di sini */}
+                                            <VoiceController textToSpeak={selectedTicket.aiSuggestions.aiSummary} />
+                                        </div>
+
+                                        <p className="text-sm text-zinc-300 italic leading-relaxed">
+                                            "{selectedTicket.aiSuggestions.aiSummary}"
+                                        </p>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* Histori Balasan (Map dari data balasanmu nanti) */}
                                 {/* Area di mana chat seharusnya muncul */}
                                 <div className="p-4 space-y-4">
                                     {/* Cari bagian ini di kode kamu */}
+
                                     {selectedTicket?.replies?.map((msg: any, index: number) => (
                                         <div key={index} className={`flex w-full mb-4 ${msg.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}>
                                             <div className={`max-w-[80%] p-3 rounded-lg ${msg.senderType === 'admin' ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-zinc-800/50 border border-zinc-700/50'}`}>
@@ -883,7 +887,13 @@ export default function AdminDashboard() {
 
                                     <div className="space-y-8">
                                         <div className="relative group">
-                                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block">Problem Abstract / Answer</label>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest block">
+                                                    Problem Abstract / Answer
+                                                </label>
+
+                                                <VoiceController textToSpeak={editableData.summary || ""} />
+                                            </div>
                                             <textarea
                                                 value={editableData.summary}
                                                 onChange={(e) => setEditableData({ ...editableData, summary: e.target.value })}

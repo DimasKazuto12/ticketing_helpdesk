@@ -226,30 +226,6 @@
   text-align: right;
 }
 
-.bubbleLabel,
-.bubbleLabelAdmin {
-  display: block;
-  font-size: 10px;
-  font-weight: 900;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
-}
-
-.bubbleLabel {
-  color: #3b82f6;
-}
-
-.bubbleLabelAdmin {
-  color: #1e40af;
-}
-
-.bubbleText {
-  color: #d4d4d8;
-  font-size: 15px;
-  line-height: 1.6;
-  font-style: italic;
-}
-
 .inputWrapper {
   padding: 30px 40px;
   border-top: 1px solid rgba(255, 255, 255, 0.03);
