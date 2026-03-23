@@ -3,6 +3,15 @@ import { PrismaClient } from "@prisma/client";
 import { render } from "@react-email/render";
 import { TicketCreatedEmail } from "@/emails/KirimEmail";
 import nodemailer from "nodemailer";
+import Pusher from "pusher";
+
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID!,
+  key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
+  secret: process.env.PUSHER_SECRET!,
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+  useTLS: true,
+});
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -51,7 +60,12 @@ export async function POST(req: Request) {
         status: "open",
         priority: "low"
       },
+      include: {
+        category: true 
+      }
     });
+    
+    await pusher.trigger('admin-updates', 'new-ticket', newTicket);
 
     try {
       const transporter = nodemailer.createTransport({

@@ -68,8 +68,8 @@ export default function LoginPage() {
                             <div className={style.logo}>
                                 <div className={style.logoIcon}></div>
                             </div>
-                            <h1 className={style.loginTitle}>Welcome Back</h1>
-                            <p className={style.loginSubtitle}>Enter the event horizon of productivity.</p>
+                            <h1 className={style.loginTitle}>Login Akun</h1>
+                            <p className={style.loginSubtitle}>Masuk ke Dashboard Admin dengan Akun yang Sudah Ada</p>
                         </div>
 
                         <form action={handleLogin} className={style.form}>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                             </div>
 
                             <button type="submit" disabled={isPending} className={style.loginBtn}>
-                                {isPending ? "Entering Horizon..." : "Sign In"}
+                                {isPending ? "Entering Horizon..." : "Masuk"}
                             </button>
                         </form>
                     </div>

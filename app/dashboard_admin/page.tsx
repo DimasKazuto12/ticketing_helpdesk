@@ -15,7 +15,8 @@ import "./admin.module.css"
 import { useRouter } from "next/navigation";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import VoiceController from '@/components/VoiceController'
+import VoiceController from '@/components/VoiceController';
+import Pusher from 'pusher-js';
 
 interface ChatMessage {
     role: 'user' | 'admin';
@@ -56,6 +57,7 @@ export default function AdminDashboard() {
     const [replyText, setReplyText] = useState("");
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const pusherRef = useRef<Pusher | null>(null);
 
     const [editableData, setEditableData] = useState({
         summary: "",
@@ -63,6 +65,66 @@ export default function AdminDashboard() {
         priority: "low",
         status: "in_progress"
     });
+
+    // 1. EFFECT UNTUK UPDATE LIST (Selalu Aktif)
+    useEffect(() => {
+        // Inisialisasi Pusher sekali saja
+        if (!pusherRef.current) {
+            pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+            });
+        }
+
+        const pusher = pusherRef.current;
+        const adminChannel = pusher.subscribe('admin-updates');
+
+        adminChannel.bind('new-ticket', (newTicket: any) => {
+            setTickets(prev => {
+                if (prev.some(t => t.id === newTicket.id)) return prev;
+                return [newTicket, ...prev];
+            });
+        });
+
+        return () => {
+            adminChannel.unbind_all();
+            pusher.unsubscribe('admin-updates');
+        };
+    }, []);
+
+    // Effect Chat Spesifik
+    useEffect(() => {
+        if (!selectedTicket?.id || !pusherRef.current) return;
+
+        const pusher = pusherRef.current;
+        const chatChannel = pusher.subscribe(`ticket-${selectedTicket.id}`);
+
+        const handleNewReply = (newReply: any) => {
+            // UPDATE SELECTED TICKET
+            setSelectedTicket((prev: any) => {
+                if (!prev || prev.id !== newReply.ticketId) return prev;
+                const isExist = prev.replies?.some((r: any) => r.id === newReply.id);
+                if (isExist) return prev;
+                return { ...prev, replies: [...(prev.replies || []), newReply] };
+            });
+
+            // UPDATE TICKETS LIST
+            setTickets(prev => prev.map(t => {
+                if (t.id === newReply.ticketId) {
+                    const isExist = t.replies?.some((r: any) => r.id === newReply.id);
+                    if (isExist) return t;
+                    return { ...t, replies: [...(t.replies || []), newReply] };
+                }
+                return t;
+            }));
+        };
+
+        chatChannel.bind('new-reply', handleNewReply);
+
+        return () => {
+            chatChannel.unbind('new-reply', handleNewReply);
+            pusher.unsubscribe(`ticket-${selectedTicket.id}`);
+        };
+    }, [selectedTicket?.id]);
 
     useEffect(() => {
         if (selectedTicket?.replies) {
@@ -286,15 +348,13 @@ export default function AdminDashboard() {
     };
 
     const handleSendReply = async () => {
-        // 1. Validasi: Jangan kirim jika semuanya kosong
         if ((!replyText.trim() && !attachmentPreview) || !selectedTicket || isAnalyzing) return;
 
         const messageToSend = replyText;
-        const imageToSend = attachmentPreview; // Ambil base64 dari state preview
+        const imageToSend = attachmentPreview;
 
-        // 2. Reset UI segera (Optimistic)
+        // 1. Reset UI (Hanya inputnya saja yang dikosongkan)
         setReplyText("");
-        setAttachment(null);
         setAttachmentPreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -306,31 +366,19 @@ export default function AdminDashboard() {
                     ticketId: selectedTicket.id,
                     message: messageToSend,
                     sender: 'ADMIN',
-                    attachment: imageToSend // Kirim gambar ke database
+                    attachment: imageToSend
                 }),
             });
 
-            if (response.ok) {
-                const newReply = await response.json();
-
-                // 3. Update State Lokal (Agar chat langsung muncul)
-                setSelectedTicket((prev: any) => ({
-                    ...prev,
-                    replies: [...(prev.replies || []), newReply]
-                }));
-
-                // Sync dengan list tiket utama
-                setTickets((prev) => prev.map(t =>
-                    t.id === selectedTicket.id
-                        ? { ...t, replies: [...(t.replies || []), newReply] }
-                        : t
-                ));
-            } else {
-                // Fallback jika gagal: kembalikan teks ke input
+            if (!response.ok) {
+                // Jika gagal, kembalikan teksnya ke input (Rollback)
                 setReplyText(messageToSend);
-                setAttachmentPreview(imageToSend);
-                toast.error("Gagal sinkronisasi Neural Core");
+                toast.error("Gagal mengirim pesan");
             }
+
+            // --- JANGAN TARUH setSelectedTicket DI SINI ---
+            // Karena Pusher akan mengirimkan data ini ke 'bind' di useEffect kamu.
+
         } catch (error) {
             console.error("Link Failure:", error);
             toast.error("Koneksi terputus");
@@ -339,61 +387,6 @@ export default function AdminDashboard() {
 
     const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    const handleAdminSend = async () => {
-        // 1. Validasi: Jangan kirim jika semuanya kosong
-        if ((!replyText.trim() && !attachmentPreview) || !selectedTicket || isAnalyzing) return;
-
-        // Simpan data ke variabel sementara sebelum state di-reset (untuk fallback jika gagal)
-        const messageToSend = replyText;
-        const imageToSend = attachmentPreview;
-
-        // 2. Reset UI secara instan (Optimistic UI)
-        setReplyText("");
-        setAttachment(null);
-        setAttachmentPreview(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-
-        try {
-            const response = await fetch('/api/ticket/replies', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ticketId: selectedTicket.id,
-                    message: messageToSend,
-                    sender: 'ADMIN',
-                    attachment: imageToSend // Mengirim Base64 dari state attachmentPreview
-                }),
-            });
-
-            if (response.ok) {
-                const newReply = await response.json();
-
-                // 3. Update State agar chat muncul di layar saat itu juga
-                setSelectedTicket((prev: any) => ({
-                    ...prev,
-                    replies: [...(prev.replies || []), newReply]
-                }));
-
-                // Update juga di list tiket utama agar data tetap sinkron
-                setTickets((prev) => prev.map(t =>
-                    t.id === selectedTicket.id
-                        ? { ...t, replies: [...(t.replies || []), newReply] }
-                        : t
-                ));
-
-                toast.success("Transmission Sent");
-            } else {
-                // Jika gagal, kembalikan teks ke input agar admin tidak perlu ngetik ulang
-                setReplyText(messageToSend);
-                setAttachmentPreview(imageToSend);
-                toast.error("Failed to sync with Neural Core");
-            }
-        } catch (error) {
-            console.error("Link Failure:", error);
-            toast.error("Connection Interrupted");
-        }
     };
 
     return (

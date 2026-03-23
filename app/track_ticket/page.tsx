@@ -80,8 +80,8 @@ export default function TrackTicketPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-6 shadow-xl">
                         <Ticket className="text-white/80" size={32} />
                     </div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Track Ticket</h1>
-                    <p className="text-zinc-500 text-sm">Enter your code to monitor progress.</p>
+                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Cari Tiket</h1>
+                    <p className="text-zinc-500 text-sm">Masukkan kode tiket yang kamu peroleh</p>
                 </div>
 
                 <form onSubmit={handleTrack}>
@@ -120,7 +120,6 @@ export default function TrackTicketPage() {
 
                                 <h2 className="text-sm font-semibold text-white mb-1 flex items-center justify-between">
                                     {ticketData.title}
-                                    <span className="text-zinc-600 group-hover:text-white transition-transform group-hover:translate-x-1">→</span>
                                 </h2>
 
                                 <p className="text-xs text-zinc-400 line-clamp-2 italic">
@@ -128,7 +127,7 @@ export default function TrackTicketPage() {
                                 </p>
 
                                 <p className="mt-4 text-[10px] text-blue-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                    Click to view full details
+                                    Klik untuk lihat lebih lanjut
                                 </p>
                             </div>
                         </Link>

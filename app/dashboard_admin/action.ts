@@ -4,6 +4,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Groq from "groq-sdk";
 import { revalidatePath } from "next/cache";
+import Pusher from "pusher";
+
+const pusherServer = new Pusher({
+  appId: process.env.PUSHER_APP_ID!,
+  key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
+  secret: process.env.PUSHER_SECRET!,
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+  useTLS: true,
+});
 
 const prisma = new PrismaClient();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -25,6 +34,7 @@ export async function getAdminDashboardData() {
     "Nov",
     "Dec",
   ];
+  
   const monthlyStats = months.map((month, index) => {
     const monthTickets = allTickets.filter(
       (t) => new Date(t.createdAt).getMonth() === index,
@@ -285,6 +295,11 @@ export async function updateTicket(
           }
         }
       },
+    });
+
+    await pusherServer.trigger(`ticket-${ticketId}`, 'ticket-updated', {
+      status: dbStatus,
+      priority: dbPriority
     });
 
     revalidatePath("/dashboard_admin");

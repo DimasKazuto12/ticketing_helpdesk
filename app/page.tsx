@@ -79,13 +79,13 @@ export default function Page() {
         {/* MAIN HERO CONTENT */}
         <main className={style.konten}>
           <h1 className={style.title}>
-            Empowering businesses with <br />
-            <span className="text-gray-500">practical AI solutions</span>
+            Menyelesaikan Masalah Teknologi<br />
+            <span className="text-gray-500">Dengan Cepat</span>
           </h1>
 
           <p className={style.subtitle}>
-            We help teams design, develop and launch intelligent products with reliable infrastructure
-            and real-world impact.
+            Dikerjakan oleh orang yang berbakat dan hebat di
+            bidangnya secara cepat dan pasti tuntas
           </p>
 
           <div className="flex flex-row sm:flex-row gap-4 relative z-20">
@@ -106,9 +106,6 @@ export default function Page() {
           <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
             Kenapa Memilih Kami?
           </h2>
-          <p className="text-gray-400 italic">
-            Solusi cerdas untuk manajemen bantuan teknologi Anda.
-          </p>
         </div>
 
         <div className={style.benefitsGrid}>
@@ -152,8 +149,7 @@ export default function Page() {
 
       <section className={style.testiSection}>
         <div className={style.testiHeader}>
-          <h2 className="text-3xl font-bold tracking-tighter text-white">USER VOICES</h2>
-          <p className="text-gray-500 italic">Pioneer feedbacks from the event horizon.</p>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">Testimoni</h2>
         </div>
 
         <div className={style.testiGrid}>
@@ -243,7 +239,7 @@ export default function Page() {
               height={52}
               className={style.footerLogoImg}
             />
-            <p className={style.footerTagline}>PIONEERING THE EVENT HORIZON</p>
+            <p className={style.footerTagline}>BERSAMA SELESAIKAN MASALAH</p>
           </div>
 
           {/* SISI KANAN: SOSIAL MEDIA (Dirapatkan ke arah kiri sedikit) */}
@@ -259,7 +255,7 @@ export default function Page() {
             <span className={style.copyright}>© 2026 DISTALK LABS</span>
             <div className={style.systemStatus}>
               <div className={style.statusPulse}></div>
-              <span>SYSTEM OPERATIONAL</span>
+              <span>SISTEM OPERASIONAL</span>
             </div>
           </div>
           <div className={style.legalLinks}>

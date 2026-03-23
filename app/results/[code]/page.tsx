@@ -80,7 +80,7 @@ export default async function ProfessionalTicketResults({ params }: { params: { 
           </div>
 
           <Link href="/track_ticket" className={styles.backButton}>
-            <ChevronLeft size={16} /> <span>EXIT SESSION</span>
+            <ChevronLeft size={16} /> <span>KELUAR</span>
           </Link>
         </aside>
 

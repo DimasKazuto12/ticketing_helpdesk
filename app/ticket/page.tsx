@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef } from 'react';
-import { X, Upload, Send, ChevronLeft, ChevronDown, Layers, Code, CreditCard, HelpCircle } from 'lucide-react';
+import { X, Upload, ChevronLeft, ChevronDown, Layers, Code, CreditCard, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import ReCAPTCHA from "react-google-recaptcha";
 import { Toaster, toast } from 'sonner';
@@ -35,10 +35,10 @@ export default function TicketPage() {
   };
 
   const categories = [
-    { id: '1', label: 'UI/UX Bug', icon: <Layers size={14} /> },
-    { id: '2', label: 'Software', icon: <Code size={14} /> },
-    { id: '3', label: 'Hardware', icon: <CreditCard size={14} /> },
-    { id: '4', label: 'Other', icon: <HelpCircle size={14} /> },
+    { id: '1', label: 'UI/UX Bug'},
+    { id: '2', label: 'Software' },
+    { id: '3', label: 'Hardware' },
+    { id: '4', label: 'Other'},
   ];
 
   async function handleSubmit(formData: FormData) {
@@ -111,8 +111,8 @@ export default function TicketPage() {
 
         <div className={styles.glassCard}>
           <header className="mb-6">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Create Ticket</h1>
-            <p className="text-zinc-500 text-xs">Fill in the details to reach our support team.</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Buat Tiket</h1>
+            <p className="text-zinc-500 text-xs">Isi data ini untuk membantu kami meneliti masalah anda</p>
           </header>
 
           <form onSubmit={(e) => {
@@ -123,24 +123,24 @@ export default function TicketPage() {
             className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className={styles.inputBox}>
-                <label>Full Name</label>
+                <label>Nama</label>
                 <input type="text" name="name" placeholder="Your Name" required />
               </div>
               <div className={styles.inputBox}>
-                <label>Active Email</label>
+                <label>Email Aktif</label>
                 <input type="email" name='email' placeholder="name@email.com" required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className={styles.inputBox}>
-                <label>Subject</label>
+                <label>Masalah</label>
                 <input type="text" name="subject" placeholder="Brief title" required />
               </div>
 
               {/* Custom Category Dropdown */}
               <div className={styles.inputBox}>
-                <label>Category</label>
+                <label>Kategori</label>
                 <div className="relative">
                   <div
                     onClick={() => setIsOpen(!isOpen)}
@@ -166,7 +166,7 @@ export default function TicketPage() {
                             setIsOpen(false);
                           }}
                         >
-                          <span className="text-zinc-500">{item.icon}</span>
+                          <span className="text-zinc-500"></span>
                           {item.label}
                         </div>
                       ))}
@@ -178,7 +178,7 @@ export default function TicketPage() {
             </div>
 
             <div className={styles.inputBox}>
-              <label>Description</label>
+              <label>Deskripsi</label>
               <textarea name="description" rows={3} placeholder="Tell us what happened..." className="resize-none"></textarea>
             </div>
 
@@ -198,7 +198,7 @@ export default function TicketPage() {
                   accept="image/*" />
                 {!fileName ? (
                   <label htmlFor="file" className="cursor-pointer flex items-center gap-2">
-                    <Upload size={14} /> Attachment
+                    <Upload size={14} /> Pilih Gambar
                   </label>
                 ) : (
                   <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 hover:bg-white/10 transition-all">
@@ -227,7 +227,7 @@ export default function TicketPage() {
                 )}
               </div>
               <button type="submit" disabled={isSending} className={styles.btnSubmit}>
-                <Send size={14} /> {isSending ? "Processing..." : "Send Ticket"}
+                 {isSending ? "Processing..." : "Kirim Tiket"}
               </button>
             </div>
           </form>

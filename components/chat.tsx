@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
 import styles from '../app/results/[code]/results.module.css';
 import VoiceController from './VoiceController';
+import Pusher from 'pusher-js';
+import { useRouter } from 'next/navigation';
 
 interface ChatInterfaceProps {
     ticketId: number;
@@ -14,7 +16,6 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({
     ticketId,
-    initialDescription,
     existingReplies,
     aiSummary,
     ticketStatus
@@ -26,9 +27,14 @@ export default function ChatInterface({
     const [replies, setReplies] = useState(existingReplies);
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
-    
+    const router = useRouter();
+
     // SOLUSI HYDRATION: State untuk mengecek apakah sudah di client
     const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setReplies(existingReplies);
+    }, [existingReplies]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -40,30 +46,79 @@ export default function ChatInterface({
         }
     }, [replies]);
 
+    // Ganti bagian useEffect Pusher kamu dengan ini:
+    useEffect(() => {
+        if (!ticketId) return;
+
+        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+        });
+
+        const channel = pusher.subscribe(`ticket-${ticketId}`);
+
+        channel.bind('new-reply', (data: any) => {
+            setReplies((prev) => {
+                // Cukup cek apakah ID pesan ini sudah ada di layar (cegah duplikat standar)
+                const isAlreadyThere = prev.some(r => r.id === data.id);
+                if (isAlreadyThere) return prev;
+
+                // Tambahkan pesan asli dari Database ke layar
+                return [...prev, data];
+            });
+        });
+
+        channel.bind('ticket-updated', () => {
+            // Ini akan memicu Server Component (ProfessionalTicketResults) 
+            // untuk menjalankan ulang getTicketData(code)
+            router.refresh(); 
+        });
+
+        return () => {
+            channel.unbind_all();
+            pusher.unsubscribe(`ticket-${ticketId}`);
+            pusher.disconnect();
+        };
+    }, [ticketId]);
+
+    
     const handleSend = async () => {
+        // 1. Validasi awal
         if ((!message.trim() && !attachment) || isLoading) return;
+
+        const currentMsg = message;
+        const currentAttachment = attachment;
+
+        // 2. Persiapan UI
         setIsLoading(true);
+        setMessage(''); // Kosongkan input agar user tahu sedang diproses
+        setAttachment(null);
 
         try {
-            const response = await fetch('/api/ticket/replies', {
+            // 3. Kirim ke API (Database)
+            const res = await fetch('/api/ticket/replies', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ticketId,
-                    message: message || "Sent an attachment",
-                    attachment,
+                    message: currentMsg || "Sent an attachment",
+                    attachment: currentAttachment,
                     sender: 'USER'
                 }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setReplies([...replies, data]);
-                setMessage('');
-                setAttachment(null);
-            }
+            if (!res.ok) throw new Error("Gagal mengirim");
+
+            // --- STOP DI SINI ---
+            // Kita tidak perlu memanggil setReplies. 
+            // Mengapa? Karena API kita di backend akan menembakkan Pusher.
+            // Pusher itu akan ditangkap oleh useEffect di bawah.
+
         } catch (err) {
-            console.error("Failed to send:", err);
+            console.error("Link Failure:", err);
+            // Jika gagal, kembalikan teks ke input agar tidak hilang
+            setMessage(currentMsg);
+            setAttachment(currentAttachment);
+            alert("Gagal mengirim pesan.");
         } finally {
             setIsLoading(false);
         }
@@ -87,7 +142,7 @@ export default function ChatInterface({
     return (
         <section className={styles.chatStream}>
             <div className={styles.logContainer} ref={scrollRef}>
-                
+
                 {/* 1. NEURAL ANALYSIS (AI) */}
                 {aiSummary && (
                     <div className="flex w-full mb-4 justify-start">
@@ -104,11 +159,10 @@ export default function ChatInterface({
                 {/* 3. REPLIES MAPPING */}
                 {replies.map((r, i) => (
                     <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-start' : 'justify-end'}`}>
-                        <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${
-                            r.senderType === 'client'
-                                ? 'bg-zinc-800/50 border border-zinc-700/50'
-                                : 'bg-blue-600/20 border border-blue-500/30'
-                        }`}>
+                        <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${r.senderType === 'client'
+                            ? 'bg-zinc-800/50 border border-zinc-700/50'
+                            : 'bg-blue-600/20 border border-blue-500/30'
+                            }`}>
                             <p className="text-[10px] uppercase opacity-50 mb-1 tracking-wider font-bold">
                                 {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
                             </p>
@@ -131,7 +185,7 @@ export default function ChatInterface({
                             )}
 
                             {/* TIMESTAMP DENGAN FIX HYDRATION */}
-                            <p 
+                            <p
                                 suppressHydrationWarning
                                 className="text-[8px] mt-2 opacity-30 text-right font-mono"
                             >
@@ -174,7 +228,7 @@ export default function ChatInterface({
 
                     <input
                         type="text"
-                        placeholder={ticketStatus === 'closed' ? "Transmission closed." : "Type your transmission..."}
+                        placeholder={ticketStatus === 'closed' ? "Transmission closed." : "Ketik pesan..."}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
