@@ -1,7 +1,6 @@
 "use server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -15,18 +14,23 @@ export async function loginAction(formData: FormData) {
 
   if (!user || user.password !== password) {
     return { 
-      success: false, // Tambahkan success: false di sini
+      success: false, 
       error: "Email atau password salah!" 
     };
   }
 
-  // Simpan session sederhana pakai Cookies (Biar bisa masuk Dashboard)
+  // --- PERBAIKAN DI SINI ---
   const cookieStore = await cookies();
-  cookieStore.set("admin_session", "true", { httpOnly: true });
+  // Simpan email user, bukan tulisan "true"
+  cookieStore.set("admin_session", user.email, { 
+    httpOnly: true,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 // Berlaku 1 hari
+  });
 
   return { 
     success: true, 
     error: null 
   };
-
 }

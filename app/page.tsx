@@ -70,9 +70,8 @@ export default function Page() {
 
           <div className="flex items-center gap-4 mr-7">
             <Link href="/login" className="no-underline">
-              <button className="text-sm font-medium text-gray-400 hover:text-white transition">Log in</button>
+              <button className="text-sm font-medium text-gray-400 hover:text-white transition">Login</button>
             </Link>
-            <User className="w-5 h-5 cursor-pointer text-white opacity-70 hover:opacity-100 transition" />
           </div>
         </nav>
 

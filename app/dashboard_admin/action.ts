@@ -34,7 +34,7 @@ export async function getAdminDashboardData() {
     "Nov",
     "Dec",
   ];
-  
+
   const monthlyStats = months.map((month, index) => {
     const monthTickets = allTickets.filter(
       (t) => new Date(t.createdAt).getMonth() === index,
@@ -147,7 +147,7 @@ export async function analyzeTicketWithAI(description: string, attachment?: stri
         console.log("✅ [DEBUG] Gemini Berhasil Merespon!");
         const rawText = data.candidates[0].content.parts[0].text;
         const aiResponse = JSON.parse(rawText);
-        return { ...aiResponse};
+        return { ...aiResponse };
       } else {
         const errBody = await response.text();
         console.error("❌ [DEBUG] Google API Marah:", errBody);
@@ -203,8 +203,8 @@ export async function getAllTickets() {
     return await prisma.ticket.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        category: true,      
-        aiSuggestions: true, 
+        category: true,
+        aiSuggestions: true,
         replies: true,
       }
     });
@@ -242,15 +242,15 @@ export async function deleteTicket(id: number) {
     return { success: true };
   } catch (error) {
     console.error("Delete Error:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Critical System Failure during wiping" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Critical System Failure during wiping"
     };
   }
 }
 
 export async function updateTicket(
-  ticketId: number, 
+  ticketId: number,
   data: { summary: string, category: string, priority: string, status: string } // Tambah parameter status
 ) {
   try {
@@ -328,4 +328,45 @@ export async function sendReplyAction(ticketId: number, message: string) {
     console.error("Failed to send reply:", error);
     return { success: false };
   }
+}
+
+export async function addAdminAction(formData: FormData) {
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  try {
+    // Gunakan Prisma untuk insert data
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password, // Disarankan pakai bcrypt untuk hash!
+        role: "admin"
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Link Error: Identity already exists" };
+  }
+}
+
+// Tambahkan di action.ts
+export async function getAdminProfile() {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("admin_session");
+
+  console.log("DEBUG - ISI COOKIE:", session?.value);
+
+  if (!session) return null;
+
+  const admin = await prisma.user.findFirst({
+    where: { 
+        email: session.value,
+        role: "admin" 
+    },
+    select: { name: true, role: true, email: true} // Ambil yang perlu saja
+  });
+
+  return admin;
 }

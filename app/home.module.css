@@ -683,8 +683,8 @@
   }
 
   .iconContainer {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 130px;
   }
 
   .nav .flex.items-center.gap-4 {
@@ -699,10 +699,10 @@
   }
 
   .title {
-    font-size: 32px;
+    font-size: 27px;
     margin-bottom: 1.5rem;
     line-height: 1.2;
-    margin-top: 9vw;
+    margin-top: 14vw;
   }
 
   .subtitle {
@@ -726,8 +726,8 @@
   }
 
   .parallaxElement {
-    left: 14%;
-    width: 80%;
+    left: 4%;
+    width: 100%;
   }
 
   .testiGrid {

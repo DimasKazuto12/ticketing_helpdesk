@@ -7,9 +7,9 @@ import {
 import {
     Download, LayoutDashboard, Ticket,
     BrainCircuit, Search, LogOut, X, Eye, ChevronRight,
-    Activity, ShieldCheck, Zap, Clock, User, Paperclip, Hash, Calendar, Layers, Maximize2, MessageSquare, Send, Trash2, Edit3
+    Activity, ShieldCheck, Zap, Clock, User, Paperclip, Hash, Calendar, Layers, Maximize2, MessageSquare, Send, Trash2, Edit3, UserPlus
 } from 'lucide-react';
-import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction, updateTicket, deleteTicket, sendReplyAction } from './action';
+import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction, updateTicket, deleteTicket, sendReplyAction, addAdminAction, getAdminProfile } from './action';
 import { toast } from 'sonner';
 import "./admin.module.css"
 import { useRouter } from "next/navigation";
@@ -58,6 +58,7 @@ export default function AdminDashboard() {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pusherRef = useRef<Pusher | null>(null);
+    const [admin, setAdmin] = useState<any>(null);
 
     const [editableData, setEditableData] = useState({
         summary: "",
@@ -65,6 +66,14 @@ export default function AdminDashboard() {
         priority: "low",
         status: "in_progress"
     });
+
+    useEffect(() => {
+        const fetchAdmin = async () => {
+            const data = await getAdminProfile();
+            setAdmin(data);
+        };
+        fetchAdmin();
+    }, []);
 
     // 1. EFFECT UNTUK UPDATE LIST (Selalu Aktif)
     useEffect(() => {
@@ -385,9 +394,7 @@ export default function AdminDashboard() {
         }
     };
 
-    const scrollToBottom = () => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    const initialEmail = admin?.email ? admin.email.charAt(0).toUpperCase() : "?";
 
     return (
         <div className=" min-h-screen bg-[#030303] flex font-sans text-zinc-300 antialiased selection:bg-blue-500/30">
@@ -402,6 +409,12 @@ export default function AdminDashboard() {
                 <nav className="flex-1 px-4 space-y-2 mt-4">
                     <button onClick={() => setActiveTab('insights')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'insights' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}>
                         <LayoutDashboard size={16} /> Dashboard
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('add_admin')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'add_admin' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}
+                    >
+                        <UserPlus size={16} /> Add Admin
                     </button>
                     <button onClick={() => setActiveTab('tickets')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tickets' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}>
                         <Ticket size={16} /> All Tickets
@@ -467,10 +480,18 @@ export default function AdminDashboard() {
 
                     <div className="flex items-center gap-5">
                         <div className="text-right">
-                            <p className="text-xs font-bold text-white uppercase tracking-tight">Dimas Aditya</p>
-                            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-[0.1em]">Root Admin</p>
+                            <p className="text-xs font-bold text-white uppercase tracking-tight">
+                                {admin?.name || "Loading..."}
+                            </p>
+                            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-[0.1em]">
+                                {admin?.role || "System"}
+                            </p>
                         </div>
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white shadow-xl">DA</div>
+
+                        {/* Avatar Berdasarkan Inisial Email */}
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center text-sm font-black text-white shadow-xl">
+                            {initialEmail}
+                        </div>
                     </div>
                 </header>
 
@@ -537,7 +558,7 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         </div>
-                    ) : (
+                    ) : activeTab === 'tickets' ? (
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center justify-between mb-10">
                                 <div>
@@ -654,7 +675,73 @@ export default function AdminDashboard() {
                                 </table>
                             </div>
                         </div>
-                    )}
+                    ) : activeTab === 'add_admin' ? (
+                        <div className="h-[calc(100vh-180px)] w-full max-w-7xl mx-auto justify-center space-y-8 animate-in fade-in duration-500">
+                            {/* Header Section - Dibuat sejajar dengan style All Tickets */}
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Neural Registry</h1>
+                                    <p className="text-zinc-500 text-sm mt-1 font-medium italic underline decoration-blue-500/30">
+                                        Registering new administrative node to the galaxy.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Form Container - Lebar dan menyatu dengan tema */}
+                            <div className="bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
+                                <form action={async (formData) => {
+                                    const res = await addAdminAction(formData);
+                                    if (res.success) {
+                                        toast.success("Admin Node Synchronized");
+                                        setActiveTab('insights');
+                                    } else {
+                                        toast.error(res.message);
+                                    }
+                                }} className="p-8 space-y-6">
+
+                                    {/* Identity Group */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-8">
+                                        <div className="md:col-span-4">
+                                            <h4 className="text-xl text-white tracking-[0.2em]">Neural Identity</h4>
+                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Full name of the new operator</p>
+                                        </div>
+                                        <div className="md:col-span-8">
+                                            <input name="name" type="text" placeholder="e.g. Sarah Connor" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
+                                        </div>
+                                    </div>
+
+                                    {/* Email Group */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-8">
+                                        <div className="md:col-span-4">
+                                            <h4 className="text-xl text-white tracking-[0.2em]">Access Point</h4>
+                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Primary neural mail address</p>
+                                        </div>
+                                        <div className="md:col-span-8">
+                                            <input name="email" type="email" placeholder="admin@distalk.system" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
+                                        </div>
+                                    </div>
+
+                                    {/* Password Group */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-4">
+                                        <div className="md:col-span-4">
+                                            <h4 className="text-xl text-white tracking-[0.2em]">Security Protocol</h4>
+                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Encrypted access password</p>
+                                        </div>
+                                        <div className="md:col-span-8">
+                                            <input name="password" type="password" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all" required />
+                                        </div>
+                                    </div>
+
+                                    {/* Action Button - Ditaruh di pojok kanan bawah seperti dashboard pro */}
+                                    <div className="flex justify-end pt-6">
+                                        <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)] flex items-center gap-2 group">
+                                            Simpan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
             </main>
 

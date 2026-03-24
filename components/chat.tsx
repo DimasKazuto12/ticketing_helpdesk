@@ -70,7 +70,7 @@ export default function ChatInterface({
         channel.bind('ticket-updated', () => {
             // Ini akan memicu Server Component (ProfessionalTicketResults) 
             // untuk menjalankan ulang getTicketData(code)
-            router.refresh(); 
+            router.refresh();
         });
 
         return () => {
@@ -80,7 +80,7 @@ export default function ChatInterface({
         };
     }, [ticketId]);
 
-    
+
     const handleSend = async () => {
         // 1. Validasi awal
         if ((!message.trim() && !attachment) || isLoading) return;
@@ -239,6 +239,13 @@ export default function ChatInterface({
                     <button
                         className={styles.sendButtonActive}
                         onClick={handleSend}
+                        onKeyDown={(e) => {
+                            // Jika tekan Enter tanpa Shift, kirim pesan
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSend(); // Panggil fungsi kirim
+                            }
+                        }}
                         disabled={isLoading || (!message.trim() && !attachment) || ticketStatus === 'closed'}
                         style={{ opacity: (message.trim() || attachment) && ticketStatus !== 'closed' ? 1 : 0.5 }}
                     >
