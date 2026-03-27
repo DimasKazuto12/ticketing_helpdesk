@@ -94,6 +94,10 @@ export default function AdminDashboard() {
             });
         });
 
+        adminChannel.bind('ticket-deleted', (data: { id: number }) => {
+            setTickets(prev => prev.filter(t => t.id !== data.id));
+        });
+
         return () => {
             adminChannel.unbind_all();
             pusher.unsubscribe('admin-updates');
@@ -676,18 +680,18 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     ) : activeTab === 'add_admin' ? (
-                        <div className="h-[calc(100vh-180px)] w-full max-w-7xl mx-auto justify-center space-y-8 animate-in fade-in duration-500">
-                            {/* Header Section - Dibuat sejajar dengan style All Tickets */}
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            {/* Header Section - Identik dengan style Tickets */}
+                            <div className="flex items-center justify-between mb-10">
                                 <div>
                                     <h1 className="text-3xl font-bold text-white tracking-tighter">Neural Registry</h1>
-                                    <p className="text-zinc-500 text-sm mt-1 font-medium italic underline decoration-blue-500/30">
+                                    <p className="text-zinc-500 text-sm mt-1 font-medium">
                                         Registering new administrative node to the galaxy.
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Form Container - Lebar dan menyatu dengan tema */}
+                            {/* Form Container - Identik dengan kontainer Tabel (bg, border, radius) */}
                             <div className="bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
                                 <form action={async (formData) => {
                                     const res = await addAdminAction(formData);
@@ -697,45 +701,45 @@ export default function AdminDashboard() {
                                     } else {
                                         toast.error(res.message);
                                     }
-                                }} className="p-8 space-y-6">
+                                }} className="p-10 space-y-10">
 
                                     {/* Identity Group */}
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-10">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-xl text-white tracking-[0.2em]">Neural Identity</h4>
-                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Full name of the new operator</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Full Name</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Identity of the new operator</p>
                                         </div>
                                         <div className="md:col-span-8">
-                                            <input name="name" type="text" placeholder="e.g. Sarah Connor" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
+                                            <input name="name" type="text" placeholder="e.g. Sarah Connor" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
                                         </div>
                                     </div>
 
                                     {/* Email Group */}
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-10">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-xl text-white tracking-[0.2em]">Access Point</h4>
-                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Primary neural mail address</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Access Point</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Primary neural mail address</p>
                                         </div>
                                         <div className="md:col-span-8">
-                                            <input name="email" type="email" placeholder="admin@distalk.system" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
+                                            <input name="email" type="email" placeholder="admin@distalk.system" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
                                         </div>
                                     </div>
 
                                     {/* Password Group */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-4">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-xl text-white tracking-[0.2em]">Security Protocol</h4>
-                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase">Encrypted access password</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Security Protocol</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Encrypted access password</p>
                                         </div>
                                         <div className="md:col-span-8">
-                                            <input name="password" type="password" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all" required />
+                                            <input name="password" type="password" placeholder="••••••••" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
                                         </div>
                                     </div>
 
-                                    {/* Action Button - Ditaruh di pojok kanan bawah seperti dashboard pro */}
+                                    {/* Action Button */}
                                     <div className="flex justify-end pt-6">
-                                        <button type="submit" className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)] flex items-center gap-2 group">
-                                            Simpan
+                                        <button type="submit" className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                                            Simpan Data Admin
                                         </button>
                                     </div>
                                 </form>

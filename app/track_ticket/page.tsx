@@ -14,12 +14,12 @@ export default function TrackTicketPage() {
         e.preventDefault();
 
         if (!inputCode) {
-            toast.error("Input Required", { description: "Please enter your ticket code." });
+            toast.error("Harus diisi", { description: "Tolong isi ticket id yang sudah didapatkan" });
             return;
         }
 
         setIsSearching(true);
-        const toastId = toast.loading('Searching for your ticket...');
+        const toastId = toast.loading('Mencari tiket...');
 
         try {
             // Kita panggil API yang sudah dibuat sebelumnya
@@ -28,19 +28,19 @@ export default function TrackTicketPage() {
 
             if (result.success) {
                 setTicketData(result.data);
-                toast.success('Ticket Found!', {
+                toast.success('Tiket Ditemukan!', {
                     id: toastId,
                     description: `Status: ${result.data.status.toUpperCase()}`,
                 });
             } else {
                 setTicketData(null);
-                toast.error('Not Found', {
+                toast.error('Tidak Ditemukan', {
                     id: toastId,
-                    description: 'We couldn\'t find a ticket with that code.',
+                    description: 'Kami tidak bisa menemukan tiketnya',
                 });
             }
         } catch (error) {
-            toast.error('Error', { id: toastId, description: 'Internal server error.' });
+            toast.error('Error', { id: toastId, description: 'server error' });
         } finally {
             setIsSearching(false);
         }
@@ -98,7 +98,7 @@ export default function TrackTicketPage() {
                     </div>
 
                     <button type="submit" disabled={isSearching} className={styles.submitBtn}>
-                        {isSearching ? "Checking..." : "Check Status"}
+                        {isSearching ? "Mencari..." : "Check Status"}
                     </button>
                 </form>
 

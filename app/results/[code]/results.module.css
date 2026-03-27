@@ -273,6 +273,50 @@
   transform: translateY(-2px);
 }
 
+/* Tambahkan di results.module.css */
+.actionGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: auto; /* Mendorong ke paling bawah sidebar */
+  padding-top: 20px;
+}
+
+.cancelBtn, .backBtn {
+  flex: 1; /* Biar ukurannya sama rata kiri-kanan */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+/* Style khusus tombol Batal */
+.cancelBtn {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.cancelBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+}
+
+/* Style tombol Keluar (samakan dengan yang sudah ada) */
+.backBtn {
+  color: #71717a;
+  background: rgba(39, 39, 42, 0.5);
+  border: 1px solid rgba(63, 63, 70, 0.5);
+}
+
 /* --- RESPONSIVE UNTUK MOBILE ANDROID --- */
 @media (max-width: 768px) {
   .workspace {

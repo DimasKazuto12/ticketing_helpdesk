@@ -47,21 +47,21 @@ export default function TicketPage() {
     const token = recaptchaRef.current?.getValue();
 
     if (!token) {
-      toast.error('Verification Required', {
-        description: 'Please complete the reCAPTCHA.',
+      toast.error('Verifikasi Dibutuhkan', {
+        description: 'Tolong lengkapi CAPTCHA.',
       });
       setIsSending(false);
       return;
     }
 
-    const toastId = toast.loading('Sending your ticket...');
+    const toastId = toast.loading('Sedang mengirim tiket...');
     const result = await createTicket(formData, token);
 
     if (result.success) {
       // Notifikasi Berhasil yang Modern
-      toast.success('Ticket Sent!', {
+      toast.success('Tiket Terkirim!', {
         id: toastId, // Mengganti loading toast tadi
-        description: `Ticket Code: ${result.data.ticketCode}`,
+        description: `Tiket Kode: ${result.data.ticketCode}`,
         duration: 3000,
       });
 
@@ -73,9 +73,9 @@ export default function TicketPage() {
     } else {
       setIsSending(false);
       recaptchaRef.current?.reset();
-      toast.error('Failed to Send', {
+      toast.error('Gagal Mengirim', {
         id: toastId,
-        description: 'Check your connection and try again.',
+        description: 'Cek koneksi kamu!',
       });
     }
   }
@@ -227,7 +227,7 @@ export default function TicketPage() {
                 )}
               </div>
               <button type="submit" disabled={isSending} className={styles.btnSubmit}>
-                 {isSending ? "Processing..." : "Kirim Tiket"}
+                 {isSending ? "Memproses..." : "Kirim Tiket"}
               </button>
             </div>
           </form>

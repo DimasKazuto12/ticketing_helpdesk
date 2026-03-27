@@ -15,13 +15,13 @@ export default function LoginPage() {
     async function handleLogin(formData: FormData) {
         setIsPending(true);
 
-        const toastId = toast.loading('Verifying credentials...'); // Munculkan loading dulu biar keren
+        const toastId = toast.loading('Memverifikasi...'); // Munculkan loading dulu biar keren
         const result = await loginAction(formData);
 
         if (result?.success) {
-            toast.success('Access Granted', {
+            toast.success('Akses Didapatkan', {
                 id: toastId, // Ganti loading tadi jadi success
-                description: 'Welcome to the command center.',
+                description: 'Selamat datang di dashboard admin',
                 duration: 2000,
             });
 
@@ -31,9 +31,9 @@ export default function LoginPage() {
             }, 2000);
         } else {
             setIsPending(false);
-            toast.error('Access Denied', {
+            toast.error('Akses Ditolak', {
                 id: toastId, // Ganti loading tadi jadi error
-                description: result?.error || 'Invalid email or password.',
+                description: result?.error || 'Email atau Password salah',
             });
         }
     }
@@ -84,7 +84,7 @@ export default function LoginPage() {
                             </div>
 
                             <button type="submit" disabled={isPending} className={style.loginBtn}>
-                                {isPending ? "Entering Horizon..." : "Masuk"}
+                                {isPending ? "Memproses..." : "Masuk"}
                             </button>
                         </form>
                     </div>

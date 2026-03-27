@@ -1,16 +1,17 @@
 import React from 'react';
-import { Activity, ChevronLeft } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import styles from './results.module.css';
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 // Import komponen chat yang baru dibuat
-import ChatInterface from '@/components/chat'; 
+import ChatInterface from '@/components/chat';
+import CancelTicketButton from '@/components/CancelTiket';
 
 async function getTicketData(code: string) {
   const ticket = await prisma.ticket.findUnique({
     where: { ticketCode: code },
-    include: { 
+    include: {
       category: true,
       aiSuggestions: true,
       replies: {
@@ -79,18 +80,25 @@ export default async function ProfessionalTicketResults({ params }: { params: { 
             <p>{ticket.description}</p>
           </div>
 
-          <Link href="/track_ticket" className={styles.backButton}>
-            <ChevronLeft size={16} /> <span>KELUAR</span>
-          </Link>
+          <div className={styles.actionGroup}>
+            {/* Tombol Batal hanya muncul jika status masih OPEN */}
+            {ticket.status === 'open' && (
+              <CancelTicketButton ticketId={ticket.id} />
+            )}
+
+            <Link href="/track_ticket" className={styles.backBtn}>
+              <span>KELUAR</span>
+            </Link>
+          </div>
         </aside>
 
         {/* 3. CENTER AREA (CHAT INTERFACE) */}
         {/* Kita ganti seluruh section chat lama dengan komponen ChatInterface.
            Kirimkan ID tiket, deskripsi awal, dan balasan yang sudah ada di DB.
         */}
-        <ChatInterface 
-          ticketId={ticket.id} 
-          initialDescription={ticket.description} 
+        <ChatInterface
+          ticketId={ticket.id}
+          initialDescription={ticket.description}
           existingReplies={ticket.replies}
           aiSummary={ticket.aiSuggestions?.aiSummary}
           ticketStatus={ticket.status}
