@@ -17,6 +17,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import VoiceController from '@/components/VoiceController';
 import Pusher from 'pusher-js';
+import { useMemo } from "react";
 
 interface ChatMessage {
     role: 'user' | 'admin';
@@ -166,6 +167,27 @@ export default function AdminDashboard() {
         }
         loadInitialData();
     }, []);
+
+    const stats = useMemo(() => {
+        // 1. Ambil total dari data dashboard atau fallback ke panjang array tickets
+        const total = data?.totalTickets || tickets?.length || 0;
+
+        // 2. Cari tiket yang statusnya 'closed' atau 'resolved'
+        // Kita filter dari 'tickets' karena state ini yang paling sering diupdate oleh Pusher
+        const resolved = tickets?.filter((t: any) =>
+            t.status?.toLowerCase() === 'closed' ||
+            t.status?.toLowerCase() === 'resolved' ||
+            t.status?.toLowerCase() === 'selesai'
+        ).length || 0;
+
+        // 3. Hitung persentase
+        const percentage = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+        // 4. Simulasi Latency (Logic: beban kerja sistem)
+        const latency = (0.8 + (total * 0.002)).toFixed(2);
+
+        return { percentage, latency, total };
+    }, [data, tickets]); // <--- Tambahkan 'tickets' di dependency agar angka update saat ada tiket baru
 
     const openDetail = (ticket: any) => {
         setSelectedTicket(ticket);
@@ -418,10 +440,10 @@ export default function AdminDashboard() {
                         onClick={() => setActiveTab('add_admin')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'add_admin' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}
                     >
-                        <UserPlus size={16} /> Add Admin
+                        <UserPlus size={16} /> Tambah Admin
                     </button>
                     <button onClick={() => setActiveTab('tickets')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tickets' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}>
-                        <Ticket size={16} /> All Tickets
+                        <Ticket size={16} /> Manajement Tiket
                     </button>
                     <button
                         onClick={() => setIsDownloadOptionsOpen(!isDownloadOptionsOpen)}
@@ -469,7 +491,7 @@ export default function AdminDashboard() {
 
                 <div className="p-6">
                     <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-zinc-600 hover:text-red-400 border border-zinc-900 rounded-xl transition-all">
-                        <LogOut size={14} /> Exit System
+                        <LogOut size={14} /> Keluar
                     </button>
                 </div>
             </aside>
@@ -479,7 +501,7 @@ export default function AdminDashboard() {
                 <header className="h-20 bg-[#030303]/80 backdrop-blur-xl border-b border-zinc-900 flex items-center justify-between px-10 z-10">
                     <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-blue-500/50 transition-all">
                         <Search size={14} className="text-zinc-600 group-focus-within:text-blue-400" />
-                        <input type="text" value={searchQuery} placeholder="Search across the galaxy..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
+                        <input type="text" value={searchQuery} placeholder="Cari Tiket..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
 
                     <div className="flex items-center gap-5">
@@ -512,10 +534,10 @@ export default function AdminDashboard() {
 
                             {/* Stats Grid - Tetap ringkas */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                                <StatCard icon={<Activity size={16} />} label="Traffic" value={data.totalTickets} color="text-white" />
-                                <StatCard icon={<ShieldCheck size={16} />} label="Resolved" value="94%" color="text-emerald-400" />
+                                <StatCard icon={<Activity size={16} />} label="Tiket" value={stats.total} color="text-white" />
+                                <StatCard icon={<ShieldCheck size={16} />} label="Selesai" value={`${stats.percentage}%`} color="text-emerald-400" />
                                 <StatCard icon={<Zap size={16} />} label="AI Node" value="Online" color="text-blue-400" />
-                                <StatCard icon={<Clock size={16} />} label="Latency" value="1.2s" color="text-purple-400" />
+                                <StatCard icon={<Clock size={16} />} label="Kecepatan" value={`${stats.latency}s`} color="text-purple-400" />
                             </div>
 
                             {/* Main Dashboard Area - Menggunakan flex-1 dan min-h-0 agar elastis */}
@@ -524,7 +546,7 @@ export default function AdminDashboard() {
                                 {/* Chart Section */}
                                 <div className="col-span-8 bg-zinc-950/40 border border-zinc-900 p-6 rounded-[2rem] flex flex-col min-h-0">
                                     <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2 shrink-0">
-                                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Monthly Activity Matrix
+                                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Aktifitas Bulanan
                                     </h3>
                                     {/* Kontainer grafik yang akan otomatis menyesuaikan tinggi */}
                                     <div className="flex-1 w-full min-h-0">
@@ -544,7 +566,7 @@ export default function AdminDashboard() {
 
                                 {/* Top Segments Section */}
                                 <div className="col-span-4 bg-zinc-950/40 border border-zinc-900 p-6 rounded-[2rem] flex flex-col min-h-0">
-                                    <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-6 shrink-0">Top Segments</h3>
+                                    <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-6 shrink-0">Kategori Terbanyak</h3>
                                     <div className="flex flex-col justify-between flex-1 min-h-0 overflow-hidden">
                                         {data.categoryData.slice(0, 5).map((cat: any, i: number) => (
                                             <div key={i} className="flex flex-col justify-center">
@@ -566,8 +588,8 @@ export default function AdminDashboard() {
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center justify-between mb-10">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Neural Records</h1>
-                                    <p className="text-zinc-500 text-sm mt-1 font-medium italic underline decoration-blue-500/30">Total of {tickets.length} nodes detected in system.</p>
+                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Tempat Semua Tiket</h1>
+                                    <p className="text-zinc-500 text-sm mt-1 font-medium decoration-blue-500/30">Total dari {tickets.length} tiket terdeteksi oleh sistem.</p>
                                 </div>
                             </div>
 
@@ -575,9 +597,9 @@ export default function AdminDashboard() {
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="border-b border-zinc-900/50 text-left bg-white/[0.02]">
-                                            <th className="pl-10 pr-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Neural Node / Client</th>
-                                            <th className="px-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Priority</th>
-                                            <th className="px-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Protocol Status</th>
+                                            <th className="pl-10 pr-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Client</th>
+                                            <th className="px-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Prioritas</th>
+                                            <th className="px-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Status</th>
                                             <th className="px-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Segment</th>
                                             <th className="pr-10 pl-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] text-right">Operation</th>
                                         </tr>
@@ -684,9 +706,9 @@ export default function AdminDashboard() {
                             {/* Header Section - Identik dengan style Tickets */}
                             <div className="flex items-center justify-between mb-10">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Neural Registry</h1>
+                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Tambah Admin</h1>
                                     <p className="text-zinc-500 text-sm mt-1 font-medium">
-                                        Registering new administrative node to the galaxy.
+                                        Menambah admin untuk kepentingan bersama
                                     </p>
                                 </div>
                             </div>
@@ -706,8 +728,8 @@ export default function AdminDashboard() {
                                     {/* Identity Group */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-10">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-lg font-bold text-white tracking-tight">Full Name</h4>
-                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Identity of the new operator</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Nama Lengkap</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Nama admin yang ingin di tambah</p>
                                         </div>
                                         <div className="md:col-span-8">
                                             <input name="name" type="text" placeholder="e.g. Sarah Connor" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
@@ -717,8 +739,8 @@ export default function AdminDashboard() {
                                     {/* Email Group */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-b border-zinc-900/50 pb-10">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-lg font-bold text-white tracking-tight">Access Point</h4>
-                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Primary neural mail address</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Email</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Email admin yang dipakai nantinya</p>
                                         </div>
                                         <div className="md:col-span-8">
                                             <input name="email" type="email" placeholder="admin@distalk.system" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
@@ -728,8 +750,8 @@ export default function AdminDashboard() {
                                     {/* Password Group */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-4">
                                         <div className="md:col-span-4">
-                                            <h4 className="text-lg font-bold text-white tracking-tight">Security Protocol</h4>
-                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Encrypted access password</p>
+                                            <h4 className="text-lg font-bold text-white tracking-tight">Password</h4>
+                                            <p className="text-[11px] text-zinc-500 mt-1 font-medium">Kode keamanan saat login</p>
                                         </div>
                                         <div className="md:col-span-8">
                                             <input name="password" type="password" placeholder="••••••••" className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-zinc-700" required />
@@ -738,8 +760,8 @@ export default function AdminDashboard() {
 
                                     {/* Action Button */}
                                     <div className="flex justify-end pt-6">
-                                        <button type="submit" className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-                                            Simpan Data Admin
+                                        <button type="submit" className="px-5 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                                            Simpan
                                         </button>
                                     </div>
                                 </form>
@@ -765,7 +787,7 @@ export default function AdminDashboard() {
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                                 <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">
-                                                    Neural Analysis Core
+                                                    Hasil analisa
                                                 </span>
                                             </div>
 
@@ -855,7 +877,7 @@ export default function AdminDashboard() {
                                         {/* Input Text */}
                                         <textarea
                                             rows={1}
-                                            placeholder="Type neural reply..."
+                                            placeholder="Ketik pesan..."
                                             className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-white py-3 resize-none max-h-32"
                                             value={replyText} // Hubungkan ke state
                                             onChange={(e) => setReplyText(e.target.value)} // Update state saat mengetik
@@ -894,8 +916,8 @@ export default function AdminDashboard() {
                                         <BrainCircuit size={24} />
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-bold text-white tracking-tighter">Node Analysis Center</h2>
-                                        <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-0.5">Vector ID: {selectedTicket.id.toString().slice(-16)}</p>
+                                        <h2 className="text-xl font-bold text-white tracking-tighter">Analysis Center</h2>
+                                        <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-0.5">ID: {selectedTicket.id.toString().slice(-16)}</p>
                                     </div>
                                 </div>
                                 <button onClick={() => setSelectedTicket(null)} className="w-10 h-10 flex items-center justify-center bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-all">
@@ -973,7 +995,7 @@ export default function AdminDashboard() {
                                         <div className="relative group">
                                             <div className="flex items-center justify-between mb-3">
                                                 <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest block">
-                                                    Problem Abstract / Answer
+                                                    Problem / Answer
                                                 </label>
 
                                                 <VoiceController textToSpeak={editableData.summary || ""} />
@@ -1100,7 +1122,7 @@ export default function AdminDashboard() {
 
                             <div className="p-7 border-t border-zinc-900 bg-black/60 backdrop-blur-xl">
                                 <button onClick={handleSaveChanges} className="w-full py-5 bg-white text-black rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 hover:text-white transition-all active:scale-[0.98] shadow-2xl">
-                                    Commit Change Record
+                                    Kirim Analisa
                                 </button>
                             </div>
                         </div>

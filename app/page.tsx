@@ -243,9 +243,9 @@ export default function Page() {
 
           {/* SISI KANAN: SOSIAL MEDIA (Dirapatkan ke arah kiri sedikit) */}
           <div className={style.footerSocial}>
-            <a href="#" className={style.socialLink}><Facebook size={22} strokeWidth={1.5} /></a>
-            <a href="#" className={style.socialLink}><Github size={22} strokeWidth={1.5} /></a>
-            <a href="#" className={style.socialLink}><Linkedin size={22} strokeWidth={1.5} /></a>
+            <a href="https://www.facebook.com/profile.php?id=100053466886026" className={style.socialLink}><Facebook size={22} strokeWidth={1.5} /></a>
+            <a href="https://github.com/DimasKazuto12" className={style.socialLink}><Github size={22} strokeWidth={1.5} /></a>
+            <a href="https://www.linkedin.com/in/dimas-sans-a5767a378/" className={style.socialLink}><Linkedin size={22} strokeWidth={1.5} /></a>
           </div>
         </div>
 
