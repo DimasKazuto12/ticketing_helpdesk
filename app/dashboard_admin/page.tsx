@@ -13,11 +13,11 @@ import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction
 import { toast } from 'sonner';
 import "./admin.module.css"
 import { useRouter } from "next/navigation";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import XLSX from 'xlsx-js-style';
 import VoiceController from '@/components/VoiceController';
 import Pusher from 'pusher-js';
 import { useMemo } from "react";
+import Image from 'next/image';
 
 interface ChatMessage {
     role: 'user' | 'admin';
@@ -247,12 +247,63 @@ export default function AdminDashboard() {
 
     if (loading || !data) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#030303] font-sans">
-                <div className="relative flex items-center justify-center">
-                    <div className="absolute w-24 h-24 border-t-2 border-blue-600 rounded-full animate-spin"></div>
-                    <div className="text-white font-bold text-xl tracking-tighter animate-pulse">D.</div>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#030303] font-mono overflow-hidden">
+                <div className="relative flex flex-col items-center">
+
+                    {/* 1. Karakter Pixel Putih Terang */}
+                    <div className="relative mb-6 w-12 h-12 animate-bounce">
+                        {/* Badan Karakter - Putih Solid dengan Glow Kuat */}
+                        <div className="absolute inset-0 bg-white shadow-[0_0_25px_rgba(255,255,255,0.8)] border border-white">
+                            {/* Mata Pixel Hitam */}
+                            <div className="absolute top-2.5 left-2 w-2 h-2 bg-black"></div>
+                            <div className="absolute top-2.5 right-2 w-2 h-2 bg-black"></div>
+                            {/* Detail Tekstur */}
+                            <div className="absolute bottom-1.5 left-1.5 right-1.5 h-1 bg-zinc-200"></div>
+                        </div>
+                    </div>
+
+                    {/* 2. White Neon Scanning Bar (Lebih Terang) */}
+                    <div className="w-56 h-[3px] bg-zinc-900 overflow-hidden relative border border-white/20">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent w-1/2 animate-[slide_1s_infinite] shadow-[0_0_20px_#ffffff]"></div>
+                    </div>
+
+                    {/* 3. Text Aesthetics - Full Brightness */}
+                    <div className="mt-12 flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-3">
+                            {/* Dot Indikator Putih Terang */}
+                            <span className="w-2 h-2 bg-white shadow-[0_0_12px_#ffffff] rounded-full animate-ping"></span>
+                            <h2 className="text-xs uppercase tracking-[0.5em] text-white font-black animate-pulse">
+                                Neural Link Active
+                            </h2>
+                        </div>
+
+                        {/* Info Text - Terang & Jelas */}
+                        <div className="flex flex-col items-center">
+                            <p className="text-[8px] uppercase tracking-[0.3em] text-zinc-100 font-bold opacity-90">
+                                Synchronizing Neural Records...
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 px-3 py-1">
+                                <p className="text-[8px] uppercase tracking-widest text-zinc-300">
+                                    Terminal: <span className="text-white">{admin?.name || 'Admin_Core'}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 4. Background Ghost Text (Diterangkan sedikit agar terlihat mewah) */}
+                    <div className="absolute -z-10 select-none pointer-events-none">
+                        <div className="text-[14rem] font-black text-white/[0.04] tracking-tighter italic">
+                            NEURAL
+                        </div>
+                    </div>
                 </div>
-                <p className="mt-12 text-[10px] uppercase tracking-[0.5em] text-zinc-600">Booting Neural OS</p>
+
+                <style jsx>{`
+                @keyframes slide {
+                    0% { transform: translateX(-150%); }
+                    100% { transform: translateX(250%); }
+                }
+            `}</style>
             </div>
         );
     }
@@ -331,14 +382,12 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleDownloadPDF = () => {
-        // Filter berdasarkan tanggal yang dipilih user
+    const handleDownloadExcel = () => {
+        // 1. Filter Tanggal
         const filteredByDate = tickets.filter(t => {
             const ticketDate = new Date(t.createdAt).toISOString().split('T')[0];
-            if (startDate && endDate) {
-                return ticketDate >= startDate && ticketDate <= endDate;
-            }
-            return true; // Jika tidak pilih tanggal, download semua
+            if (startDate && endDate) return ticketDate >= startDate && ticketDate <= endDate;
+            return true;
         });
 
         if (filteredByDate.length === 0) {
@@ -346,30 +395,58 @@ export default function AdminDashboard() {
             return;
         }
 
-        const doc = new jsPDF();
-        // ... (Logika styling PDF sama seperti sebelumnya) ...
+        // 2. Sorting: Terlama ke Terbaru
+        const sortedData = [...filteredByDate].sort((a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
 
-        // Tambahkan info periode di PDF
-        doc.setFontSize(10);
-        doc.text(`Periode: ${startDate || 'All'} s/d ${endDate || 'All'}`, 14, 35);
+        // 3. Data Mapping (Ditambah kolom Admin)
+        const dataToExport = sortedData.map(t => ({
+            "ID TIKET": `ID_${t.id.toString().slice(-8)}`,
+            "JUDUL LAPORAN": t.title,
+            "EMAIL CLIENT": t.clientEmail,
+            "STATUS": t.status.toUpperCase(),
+            "TANGGAL DIBUAT": new Date(t.createdAt).toLocaleDateString('id-ID'),
+            "KATEGORI": t.category?.categoryName || "Uncategorized",
+            "ADMIN PENGOLAH": admin?.name || "Neural System" // <--- Ambil dari state 'admin'
+        }));
 
-        const tableRows = filteredByDate.map(t => [
-            `ID_${t.id.toString().slice(-8)}`,
-            t.title,
-            t.clientEmail,
-            t.status.toUpperCase(),
-            new Date(t.createdAt).toLocaleDateString() // Tambahkan kolom tanggal di PDF
-        ]);
+        // 4. Buat Worksheet
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
 
-        autoTable(doc, {
-            head: [["ID", "Title", "Client", "Status", "Date"]],
-            body: tableRows,
-            startY: 45,
-            theme: 'grid',
-            // ... (styling autoTable) ...
+        // 5. LOGIKA BOLD UNTUK HEADER (A1 sampai G1 karena tambah 1 kolom)
+        const headerRange = ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1'];
+
+        headerRange.forEach((cellId) => {
+            if (worksheet[cellId]) {
+                worksheet[cellId].s = {
+                    font: {
+                        bold: true,
+                        color: { rgb: "FFFFFF" }
+                    },
+                    fill: {
+                        fgColor: { rgb: "525252" }
+                    },
+                    alignment: {
+                        horizontal: "center"
+                    }
+                };
+            }
         });
 
-        doc.save(`report_${startDate || 'all'}_to_${endDate || 'all'}.pdf`);
+        // 6. Atur Lebar Kolom (Tambah satu di akhir untuk Admin)
+        worksheet['!cols'] = [
+            { wch: 15 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 18 }, { wch: 20 }, { wch: 20 }
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Tiket");
+
+        // 7. Nama file menggunakan nama Admin agar lebih personal
+        const adminName = admin?.name?.replace(/\s+/g, '_') || 'Admin';
+        XLSX.writeFile(workbook, `Report_NeuralOS_${adminName}_${startDate || 'All'}.xlsx`);
+
+        toast.success(`Laporan atas nama ${admin?.name} berhasil diunduh!`);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -423,13 +500,22 @@ export default function AdminDashboard() {
     const initialEmail = admin?.email ? admin.email.charAt(0).toUpperCase() : "?";
 
     return (
-        <div className=" min-h-screen bg-[#030303] flex font-sans text-zinc-300 antialiased selection:bg-blue-500/30">
+        <div className=" min-h-screen bg-[#030303] flex font-sans text-zinc-300 antialiased">
 
             {/* Sidebar */}
             <aside className="w-64 border-r border-zinc-900 bg-[#050505] flex flex-col z-20">
-                <div className="p-8 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,1)]"></div>
-                    <span className="text-xl font-bold tracking-tighter text-white">distalk.</span>
+                <div className="p-8 flex items-center gap-2 overflow-hidden">
+                    <div className="relative w-full h-3 flex items-center">
+                        <Image
+                            src="/image/icon.png"
+                            alt="Distalk Logo"
+                            fill
+                            className="object-contain object-left scale-[11.5] origin-left"
+                            // scale-[2.5] akan memperbesar isi gambarnya saja tanpa nambah ukuran kotak
+                            // origin-left memastikan perbesaran fokus ke arah kiri
+                            priority
+                        />
+                    </div>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -465,7 +551,7 @@ export default function AdminDashboard() {
                                     type="date"
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
-                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors [color-scheme:dark]"
+                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-[10px] text-white focus:outline-none transition-colors [color-scheme:dark]"
                                 />
                             </div>
 
@@ -475,12 +561,12 @@ export default function AdminDashboard() {
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors [color-scheme:dark]"
+                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-[10px] text-white focus:outline-none transition-colors [color-scheme:dark]"
                                 />
                             </div>
 
                             <button
-                                onClick={handleDownloadPDF}
+                                onClick={handleDownloadExcel}
                                 className="w-full py-2 bg-white hover:bg-white/35 text-black/100 hover:text-white border border-white/15 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all flex items-center justify-center gap-2"
                             >
                                 <Download size={12} />
@@ -499,8 +585,8 @@ export default function AdminDashboard() {
             {/* Main Content */}
             <main className="flex-1 flex flex-col max-h-screen overflow-hidden">
                 <header className="h-20 bg-[#030303]/80 backdrop-blur-xl border-b border-zinc-900 flex items-center justify-between px-10 z-10">
-                    <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-blue-500/50 transition-all">
-                        <Search size={14} className="text-zinc-600 group-focus-within:text-blue-400" />
+                    <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-zinc-500/50 transition-all">
+                        <Search size={14} className="text-zinc-600 group-focus-within:text-zinc-400" />
                         <input type="text" value={searchQuery} placeholder="Cari Tiket..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
 
@@ -509,7 +595,7 @@ export default function AdminDashboard() {
                             <p className="text-xs font-bold text-white uppercase tracking-tight">
                                 {admin?.name || "Loading..."}
                             </p>
-                            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-[0.1em]">
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.1em]">
                                 {admin?.role || "System"}
                             </p>
                         </div>
@@ -528,16 +614,16 @@ export default function AdminDashboard() {
                     [&::-webkit-scrollbar-track]:bg-transparent
                     [&::-webkit-scrollbar-thumb]:bg-zinc-800
                     [&::-webkit-scrollbar-thumb]:rounded-full
-                    hover:[&::-webkit-scrollbar-thumb]:bg-blue-500/50">
+                    hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/50">
                     {activeTab === 'insights' ? (
                         <div className="h-full max-h-[calc(100vh-180px)] w-full max-w-7xl mx-auto flex flex-col space-y-6 animate-in fade-in zoom-in-95 duration-700 overflow-hidden">
 
                             {/* Stats Grid - Tetap ringkas */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                                <StatCard icon={<Activity size={16} />} label="Tiket" value={stats.total} color="text-white" />
-                                <StatCard icon={<ShieldCheck size={16} />} label="Selesai" value={`${stats.percentage}%`} color="text-emerald-400" />
-                                <StatCard icon={<Zap size={16} />} label="AI Node" value="Online" color="text-blue-400" />
-                                <StatCard icon={<Clock size={16} />} label="Kecepatan" value={`${stats.latency}s`} color="text-purple-400" />
+                                <StatCard icon={<Activity size={16} color="gray"/>} label="Tiket" value={stats.total} color="text-white" />
+                                <StatCard icon={<ShieldCheck size={16} color="gray"/>} label="Selesai" value={`${stats.percentage}%`} color="text-emerald-400" />
+                                <StatCard icon={<Zap size={16} color="gray"/>} label="AI Node" value="Online" color="text-blue-400" />
+                                <StatCard icon={<Clock size={16} color="gray"/>} label="Kecepatan" value={`${stats.latency}s`} color="text-purple-400" />
                             </div>
 
                             {/* Main Dashboard Area - Menggunakan flex-1 dan min-h-0 agar elastis */}
@@ -546,7 +632,7 @@ export default function AdminDashboard() {
                                 {/* Chart Section */}
                                 <div className="col-span-8 bg-zinc-950/40 border border-zinc-900 p-6 rounded-[2rem] flex flex-col min-h-0">
                                     <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2 shrink-0">
-                                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Aktifitas Bulanan
+                                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-pulse"></span> Aktifitas Bulanan
                                     </h3>
                                     {/* Kontainer grafik yang akan otomatis menyesuaikan tinggi */}
                                     <div className="flex-1 w-full min-h-0">
@@ -575,7 +661,7 @@ export default function AdminDashboard() {
                                                     <span className="text-white">{cat.count}</span>
                                                 </div>
                                                 <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-600 rounded-full"
+                                                    <div className="h-full bg-zinc-600 rounded-full"
                                                         style={{ width: `${(cat.count / data.categoryData[0].count) * 100}%` }}></div>
                                                 </div>
                                             </div>
@@ -589,7 +675,7 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-between mb-10">
                                 <div>
                                     <h1 className="text-3xl font-bold text-white tracking-tighter">Tempat Semua Tiket</h1>
-                                    <p className="text-zinc-500 text-sm mt-1 font-medium decoration-blue-500/30">Total dari {tickets.length} tiket terdeteksi oleh sistem.</p>
+                                    <p className="text-zinc-500 text-sm mt-1 font-medium decoration-zinc-500/30">Total dari {tickets.length} tiket terdeteksi oleh sistem.</p>
                                 </div>
                             </div>
 
@@ -609,12 +695,12 @@ export default function AdminDashboard() {
                                             <tr key={t.id} className="group hover:bg-white/[0.02] transition-all duration-300">
                                                 <td className="pl-10 pr-6 py-7">
                                                     <div className="flex items-center gap-5">
-                                                        <div className="w-11 h-11 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 text-zinc-500 group-hover:border-blue-500/50 group-hover:text-blue-500 transition-all">
+                                                        <div className="w-11 h-11 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 text-zinc-500">
                                                             <Hash size={18} />
                                                         </div>
                                                         <div className="flex flex-col">
                                                             {/* DATA ASLI DARI DATABASE */}
-                                                            <span className="text-sm font-bold text-white group-hover:text-blue-400 tracking-tight transition-colors">{t.title}</span>
+                                                            <span className="text-sm font-bold text-white tracking-tight">{t.title}</span>
                                                             <span className="text-[10px] font-medium text-zinc-600 mt-1 uppercase tracking-widest">{t.ticketCode}</span>
                                                         </div>
                                                     </div>
@@ -760,7 +846,7 @@ export default function AdminDashboard() {
 
                                     {/* Action Button */}
                                     <div className="flex justify-end pt-6">
-                                        <button type="submit" className="px-5 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                                        <button type="submit" className="px-5 py-4 bg-zinc-700 hover:bg-zinc-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(0,0,0,0.2)]">
                                             Simpan
                                         </button>
                                     </div>
@@ -782,11 +868,11 @@ export default function AdminDashboard() {
                             <div className="flex-1 overflow-y-auto p-8 space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 {/* Pesan Awal User */}
                                 {selectedTicket?.aiSuggestions && (
-                                    <div className="mb-6 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 border-dashed relative group">
+                                    <div className="mb-6 p-4 rounded-xl border border-zinc-500/30 bg-zinc-500/5 border-dashed relative group">
                                         <div className="flex justify-between items-center mb-2">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" />
+                                                <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">
                                                     Hasil analisa
                                                 </span>
                                             </div>
@@ -857,7 +943,7 @@ export default function AdminDashboard() {
                                         </div>
                                     )}
 
-                                    <div className="flex items-end gap-2 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-2 focus-within:border-blue-500/50 transition-all">
+                                    <div className="flex items-end gap-2 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-2 focus-within:border-zinc-500/50 transition-all">
                                         {/* Tombol Lampiran (Hidden Input) */}
                                         <input
                                             type="file"
@@ -875,10 +961,9 @@ export default function AdminDashboard() {
                                         </button>
 
                                         {/* Input Text */}
-                                        <textarea
-                                            rows={1}
+                                        <input
                                             placeholder="Ketik pesan..."
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-white py-3 resize-none max-h-32"
+                                            className="border-none outline-none flex-1 bg-transparent border-none focus:ring-0 text-sm text-white py-3 resize-none max-h-32"
                                             value={replyText} // Hubungkan ke state
                                             onChange={(e) => setReplyText(e.target.value)} // Update state saat mengetik
                                             onInput={(e) => {
@@ -900,7 +985,7 @@ export default function AdminDashboard() {
                                             onClick={handleSendReply}
                                             title="Send Reply" // Menghilangkan error "Buttons must have discernible text"
                                             aria-label="Send reply to ticket" // Standar aksesibilitas untuk screen reader
-                                            className="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center justify-center"
+                                            className="p-3 bg-zinc-600 text-white rounded-xl hover:bg-zinc-500 transition-all active:scale-95 flex items-center justify-center"
                                         >
                                             <Send size={18} />
                                         </button>
@@ -912,7 +997,7 @@ export default function AdminDashboard() {
                         <div className="w-[450px] flex flex-col bg-black">
                             <div className="p-8 border-b border-zinc-900 flex items-center justify-between bg-black/40 backdrop-blur-xl">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-blue-600/10 border border-blue-600/20 rounded-2xl flex items-center justify-center text-blue-500">
+                                    <div className="w-12 h-12 bg-zinc-900 border border-zinc-700 rounded-2xl flex items-center justify-center text-zinc-400">
                                         <BrainCircuit size={24} />
                                     </div>
                                     <div>
@@ -932,7 +1017,7 @@ export default function AdminDashboard() {
                             [&::-webkit-scrollbar-track]:bg-transparent
                             [&::-webkit-scrollbar-thumb]:bg-zinc-800
                             [&::-webkit-scrollbar-thumb]:rounded-full
-                            hover:[&::-webkit-scrollbar-thumb]:bg-blue-500/50">
+                            hover:[&::-webkit-scrollbar-thumb]:bg-zinc-500/50">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="p-4 bg-zinc-900/30 border border-zinc-900 rounded-2xl">
                                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-2 flex items-center gap-2"><User size={10} /> Requester</p>
@@ -945,7 +1030,7 @@ export default function AdminDashboard() {
                                 </div>
 
                                 <section>
-                                    <div className="bg-zinc-900/40 border-l-2 border-blue-600 p-8 rounded-tr-3xl rounded-br-3xl">
+                                    <div className="bg-zinc-900/40 border-l-2 border-zinc-500 p-8 rounded-tr-3xl rounded-br-3xl">
                                         <h3 className="text-lg font-bold text-white mb-4 tracking-tight leading-snug">{selectedTicket.title}</h3>
                                         <p className="text-sm text-zinc-400 leading-relaxed font-medium">"{selectedTicket.description}"</p>
                                     </div>
@@ -954,7 +1039,7 @@ export default function AdminDashboard() {
                                 {selectedTicket?.attachment && (
                                     <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                         <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
-                                            <Eye size={12} className="text-blue-500" /> Neural Visual Feed
+                                            <Eye size={12} className="text-zinc-700" /> Neural Visual Feed
                                         </label>
 
                                         <div
@@ -974,7 +1059,7 @@ export default function AdminDashboard() {
 
                                             {isAnalyzing && (
                                                 <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
-                                                    <div className="w-full h-[2px] bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan opacity-70"></div>
+                                                    <div className="w-full h-[2px] bg-zinc-500 shadow-[0_0_15px_rgba(0,0,0,0.8)] animate-scan opacity-70"></div>
                                                 </div>
                                             )}
                                         </div>
@@ -985,7 +1070,7 @@ export default function AdminDashboard() {
                                 <section className="space-y-8 ">
                                     <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                                         <h4 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">AI Processing Engine</h4>
-                                        <button onClick={handleAskAI} disabled={isAnalyzing} className="flex items-center gap-3 px-5 py-2.5 bg-blue-600/10 border border-blue-600/20 text-blue-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-30">
+                                        <button onClick={handleAskAI} disabled={isAnalyzing} className="flex items-center gap-3 px-5 py-2.5 bg-zinc-900 text-zinc-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30">
                                             <Zap size={14} className={isAnalyzing ? "animate-pulse" : "fill-current"} />
                                             {isAnalyzing ? "Computing..." : "Run Neural Sync"}
                                         </button>
@@ -1003,7 +1088,7 @@ export default function AdminDashboard() {
                                             <textarea
                                                 value={editableData.summary}
                                                 onChange={(e) => setEditableData({ ...editableData, summary: e.target.value })}
-                                                className="w-full bg-black border border-zinc-800 rounded-2xl p-6 text-sm focus:border-blue-600 outline-none transition-all min-h-[160px] text-zinc-300 placeholder:text-zinc-800 font-medium leading-relaxed [&::-webkit-scrollbar]:pointer-events-none
+                                                className="w-full bg-black border border-zinc-800 rounded-2xl p-6 text-sm focus:border-zinc-600 outline-none transition-all min-h-[160px] text-zinc-300 placeholder:text-zinc-800 font-medium leading-relaxed [&::-webkit-scrollbar]:pointer-events-none
                                             [&::-webkit-scrollbar]:hidden
                                             [-ms-overflow-style:none] 
                                             [scrollbar-width:none]"
@@ -1021,7 +1106,7 @@ export default function AdminDashboard() {
                                                     <button
                                                         type="button"
                                                         onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                                                        className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl px-6 py-4 flex items-center justify-between group/btn hover:border-blue-500/50 transition-all shadow-2xl"
+                                                        className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl px-6 py-4 flex items-center justify-between group/btn hover:border-zinc-500/50 transition-all shadow-2xl"
                                                     >
                                                         <span className="text-[11px] font-black text-white uppercase tracking-widest">
                                                             {/* 3. PERBAIKAN: Tampilkan label berdasarkan status.id yang terpilih */}
@@ -1073,7 +1158,7 @@ export default function AdminDashboard() {
                                                     <button
                                                         type="button"
                                                         onClick={() => setIsPriorityOpen(!isPriorityOpen)}
-                                                        className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl px-6 py-4 flex items-center justify-between group/btn hover:border-blue-500/50 transition-all shadow-2xl"
+                                                        className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl px-6 py-4 flex items-center justify-between group/btn hover:border-zinc-500/50 transition-all shadow-2xl"
                                                     >
                                                         <span className="text-[11px] font-black text-white uppercase tracking-widest">
                                                             {editableData.priority === 'Tinggi' ? 'Tinggi' :
@@ -1097,14 +1182,14 @@ export default function AdminDashboard() {
                                                                         setIsPriorityOpen(false);
                                                                     }}
                                                                     className={`w-full flex flex-col items-start p-3 rounded-xl transition-all mb-2 last:mb-0 group/item ${editableData.priority === opt.id
-                                                                        ? 'bg-blue-600/10 border border-blue-500/20'
+                                                                        ? 'bg-zinc-300/10 border border-zinc-500/20'
                                                                         : 'hover:bg-white/[0.03] border border-transparent hover:border-zinc-800'
                                                                         }`}
                                                                 >
                                                                     <div className="flex items-center gap-2 mb-1">
-                                                                        <div className={`w-1.5 h-1.5 rounded-full ${editableData.priority === opt.id ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-zinc-700'
+                                                                        <div className={`w-1.5 h-1.5 rounded-full ${editableData.priority === opt.id ? 'bg-zinc-300' : 'bg-zinc-700'
                                                                             }`} />
-                                                                        <span className={`text-[10px] font-black uppercase tracking-widest ${editableData.priority === opt.id ? 'text-blue-400' : 'text-zinc-400'
+                                                                        <span className={`text-[10px] font-black uppercase tracking-widest ${editableData.priority === opt.id ? 'text-zinc-400' : 'text-zinc-400'
                                                                             }`}>
                                                                             {opt.label}
                                                                         </span>
@@ -1121,7 +1206,7 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="p-7 border-t border-zinc-900 bg-black/60 backdrop-blur-xl">
-                                <button onClick={handleSaveChanges} className="w-full py-5 bg-white text-black rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 hover:text-white transition-all active:scale-[0.98] shadow-2xl">
+                                <button onClick={handleSaveChanges} className="w-full py-5 bg-zinc-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white transition-all active:scale-[0.98] shadow-2xl">
                                     Kirim Analisa
                                 </button>
                             </div>
@@ -1133,22 +1218,12 @@ export default function AdminDashboard() {
                             className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm p-10 animate-in fade-in duration-200"
                             onClick={() => setIsPreviewOpen(false)}
                         >
-                            <button
-                                className="absolute top-10 right-10 text-white/50 hover:text-white transition-colors"
-                                onClick={() => setIsPreviewOpen(false)}
-                            >
-                                <X size={40} strokeWidth={1} />
-                            </button>
 
                             <img
                                 src={selectedTicket.attachment}
                                 alt="Full Evidence"
                                 className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
                             />
-
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-900/80 border border-zinc-800 rounded-full text-[10px] text-zinc-400 font-mono tracking-widest uppercase">
-                                Neural_Analysis_Mode: Full_Frame_View
-                            </div>
                         </div>
                     )}
 

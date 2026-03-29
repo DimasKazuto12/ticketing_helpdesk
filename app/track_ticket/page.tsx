@@ -86,7 +86,7 @@ export default function TrackTicketPage() {
 
                 <form onSubmit={handleTrack}>
                     <div className="relative group mb-4">
-                        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${isSearching ? 'text-blue-500' : 'text-zinc-700 group-focus-within:text-white'}`} size={18} />
+                        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${isSearching ? 'text-zinc-500' : 'text-zinc-700 group-focus-within:text-white'}`} size={18} />
                         <input
                             type="text"
                             placeholder="TIX-XXXXXX"
@@ -106,9 +106,9 @@ export default function TrackTicketPage() {
                 {ticketData && (
                     <div className="mt-8 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-500">
                         <Link href={`/results/${ticketData.ticketCode}`} className="block group">
-                            <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-blue-500/50 hover:bg-white/[0.07] transition-all cursor-pointer group-hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-zinc-500/50 hover:bg-white/[0.07] transition-all cursor-pointer group-hover:shadow-[0_0_20px_rgba(0,0,0,0.8)]">
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-[10px] text-zinc-500 font-mono tracking-widest group-hover:text-blue-400 transition-colors">
+                                    <span className="text-[10px] text-zinc-500 font-mono tracking-widest group-hover:text-zinc-400 transition-colors">
                                         {ticketData.ticketCode}
                                     </span>
                                     <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md uppercase ${ticketData.status === 'open' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-green-500/10 text-green-500'
@@ -126,7 +126,7 @@ export default function TrackTicketPage() {
                                     "{ticketData.description}"
                                 </p>
 
-                                <p className="mt-4 text-[10px] text-blue-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="mt-4 text-[10px] text-zinc-300 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                                     Klik untuk lihat lebih lanjut
                                 </p>
                             </div>

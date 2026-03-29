@@ -146,9 +146,14 @@ export default function ChatInterface({
                 {/* 1. NEURAL ANALYSIS (AI) */}
                 {aiSummary && (
                     <div className="flex w-full mb-4 justify-start">
-                        <div className="max-w-[80%] p-3 rounded-lg shadow-lg border border-dashed border-blue-500/50 bg-blue-600/10 transition-all">
-                            <div className="flex justify-between items-start mb-1 gap-4">
-                                <span className="text-[10px] uppercase text-blue-400 tracking-wider font-bold">NEURAL_ANALYSIS_CORE</span>
+                        <div className="max-w-[80%] p-3 rounded-lg shadow-lg border border-dashed border-zinc-500/50 bg-zinc-600/10 transition-all">
+                            <div className="flex justify-between items-start mb-2 gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />
+                                    <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">
+                                        Hasil analisa
+                                    </span>
+                                </div>
                                 <VoiceController textToSpeak={aiSummary} />
                             </div>
                             <p className="text-sm text-zinc-100 leading-relaxed opacity-90">{aiSummary}</p>

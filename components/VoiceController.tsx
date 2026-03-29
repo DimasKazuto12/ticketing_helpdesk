@@ -46,7 +46,7 @@ export default function VoiceController({ textToSpeak }: { textToSpeak: string }
             {/* Tombol Utama (Ikon Speaker) */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-full border border-gray-800 bg-black/40 hover:bg-gray-800 transition text-blue-400"
+                className="p-2 rounded-full border border-zinc-500 bg-black/40 hover:bg-zinc-800 transition text-zinc-400"
             >
                 <Volume2 size={16} />
             </button>
