@@ -225,7 +225,7 @@ export default function ChatInterface({
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="text-zinc-500 hover:text-blue-500 transition-colors"
+                        className="text-zinc-500"
                         disabled={ticketStatus === 'closed'}
                     >
                         <Paperclip size={18} />

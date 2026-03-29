@@ -62,13 +62,13 @@ export default function VoiceController({ textToSpeak }: { textToSpeak: string }
                     <div className="flex gap-1 bg-black p-1 rounded border border-gray-800 mb-3">
                         <button
                             onClick={() => setMode('INDO')}
-                            className={`flex-1 text-[10px] py-1 rounded transition ${mode === 'INDO' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
+                            className={`flex-1 text-[10px] py-1 rounded transition ${mode === 'INDO' ? 'bg-red-600 text-white' : 'text-gray-400'}`}
                         >
                             🇮🇩 INDO
                         </button>
                         <button
                             onClick={() => setMode('JAPAN')}
-                            className={`flex-1 text-[10px] py-1 rounded transition ${mode === 'JAPAN' ? 'bg-green-600 text-white' : 'text-gray-400'}`}
+                            className={`flex-1 text-[10px] py-1 rounded transition ${mode === 'JAPAN' ? 'bg-pink-600 text-white' : 'text-gray-400'}`}
                         >
                             🇯🇵 JP
                         </button>
@@ -90,7 +90,7 @@ export default function VoiceController({ textToSpeak }: { textToSpeak: string }
                     <button
                         onClick={handleSpeak}
                         disabled={loading}
-                        className="w-full bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-bold py-2 rounded flex items-center justify-center gap-2 transition disabled:opacity-50"
+                        className="w-full bg-zinc-900 hover:bg-zinc-800 text-white text-[10px] font-bold py-2 rounded flex items-center justify-center gap-2 transition disabled:opacity-50"
                     >
                         {loading ? "..." : <><Play size={10} fill="white" /> PLAY ANALYSYS</>}
                     </button>

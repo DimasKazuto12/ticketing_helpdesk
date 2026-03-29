@@ -37,7 +37,7 @@ export default async function ProfessionalTicketResults({ params }: { params: { 
       <nav className={styles.navbar}>
         <div className={styles.navLeft}>
           <div className={styles.systemBadge}>
-            <Activity size={14} className="text-blue-500 animate-pulse" />
+            <Activity size={14} className="text-zinc-300 animate-pulse" />
             <span>DISTALK PROTOCOL v.2.0</span>
           </div>
         </div>

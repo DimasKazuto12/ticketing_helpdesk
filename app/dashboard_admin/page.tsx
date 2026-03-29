@@ -955,7 +955,7 @@ export default function AdminDashboard() {
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="p-3 text-zinc-500 hover:text-white transition-colors"
+                                            className="p-3 text-zinc-500"
                                         >
                                             <Paperclip size={20} />
                                         </button>
