@@ -7,9 +7,9 @@ import {
 import {
     Download, LayoutDashboard, Ticket,
     BrainCircuit, Search, LogOut, X, Eye, ChevronRight,
-    Activity, ShieldCheck, Zap, Clock, User, Paperclip, Hash, Calendar, Layers, Maximize2, MessageSquare, Send, Trash2, Edit3, UserPlus
+    Activity, ShieldCheck, Zap, Clock, User, Paperclip, Hash, Calendar, Layers, Maximize2, MessageSquare, Send, Trash2, Edit3, UserPlus, Users
 } from 'lucide-react';
-import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction, updateTicket, deleteTicket, sendReplyAction, addAdminAction, getAdminProfile } from './action';
+import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction, updateTicket, deleteTicket, sendReplyAction, addAdminAction, getAdminProfile, deleteAdminAction, getAdminsAction } from './action';
 import { toast } from 'sonner';
 import "./admin.module.css"
 import { useRouter } from "next/navigation";
@@ -28,6 +28,13 @@ interface TicketData {
     id: string | number;
     replies: ChatMessage[];
     // ... tambahkan properti lain jika perlu
+}
+
+interface AdminType {
+    id: number;
+    name: string;
+    email: string;
+    createdAt: Date;
 }
 
 // 2. Definisikan Props yang dikirim dari Page Utama
@@ -60,6 +67,8 @@ export default function AdminDashboard() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pusherRef = useRef<Pusher | null>(null);
     const [admin, setAdmin] = useState<any>(null);
+    const [admins, setAdmins] = useState<AdminType[]>([]);
+    const [loadingAdmins, setLoadingAdmins] = useState(false);
 
     const [editableData, setEditableData] = useState({
         summary: "",
@@ -167,6 +176,47 @@ export default function AdminDashboard() {
         }
         loadInitialData();
     }, []);
+
+    useEffect(() => {
+        // 1. Tambahkan flag isMounted untuk mencegah update state pada komponen yang sudah unmount
+        let isMounted = true;
+
+        const loadAdmins = async () => {
+            // Hanya jalankan jika tab-nya sesuai
+            if (activeTab !== 'manage_admin') return;
+
+            setLoadingAdmins(true);
+            try {
+                const response = await getAdminsAction();
+
+                if (isMounted) {
+                    // Gunakan pengecekan yang lebih simpel tapi kuat
+                    if (response?.success && Array.isArray(response.data)) {
+                        setAdmins(response.data as AdminType[]);
+                    } else {
+                        setAdmins([]);
+                        // toast.error(response?.message || "Sync Failed");
+                    }
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.error("Neural Error:", error);
+                    setAdmins([]);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoadingAdmins(false);
+                }
+            }
+        };
+
+        loadAdmins();
+
+        // 2. Cleanup function
+        return () => {
+            isMounted = false;
+        };
+    }, [activeTab]);
 
     const stats = useMemo(() => {
         // 1. Ambil total dari data dashboard atau fallback ke panjang array tickets
@@ -499,6 +549,21 @@ export default function AdminDashboard() {
 
     const initialEmail = admin?.email ? admin.email.charAt(0).toUpperCase() : "?";
 
+    const handleDeleteAdmin = async (id: number) => {
+        if (!confirm("Revoke admin access?")) return;
+
+        // Pastikan memanggil deleteAdminAction, BUKAN getAdminsAction
+        const res = await deleteAdminAction(id);
+
+        // Cek property success dari object 'res'
+        if (res && res.success) {
+            toast.success("Admin node de-synchronized");
+            setAdmins(prev => prev.filter(admin => admin.id !== id));
+        } else {
+            toast.error("Gagal menghapus admin");
+        }
+    };
+
     return (
         <div className=" min-h-screen bg-[#030303] flex font-sans text-zinc-300 antialiased">
 
@@ -527,6 +592,12 @@ export default function AdminDashboard() {
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'add_admin' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}
                     >
                         <UserPlus size={16} /> Tambah Admin
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('manage_admin')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'manage_admin' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}
+                    >
+                        <Users size={16} /> Kelola Admin
                     </button>
                     <button onClick={() => setActiveTab('tickets')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tickets' ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40'}`}>
                         <Ticket size={16} /> Manajement Tiket
@@ -585,12 +656,8 @@ export default function AdminDashboard() {
             {/* Main Content */}
             <main className="flex-1 flex flex-col max-h-screen overflow-hidden">
                 <header className="h-20 bg-[#030303]/80 backdrop-blur-xl border-b border-zinc-900 flex items-center justify-between px-10 z-10">
-                    <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-zinc-500/50 transition-all">
-                        <Search size={14} className="text-zinc-600 group-focus-within:text-zinc-400" />
-                        <input type="text" value={searchQuery} placeholder="Cari Tiket..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
-                    </div>
-
-                    <div className="flex items-center gap-5">
+                    <div></div>
+                    <div className="flex item-center gap-5">
                         <div className="text-right">
                             <p className="text-xs font-bold text-white uppercase tracking-tight">
                                 {admin?.name || "Loading..."}
@@ -620,10 +687,10 @@ export default function AdminDashboard() {
 
                             {/* Stats Grid - Tetap ringkas */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                                <StatCard icon={<Activity size={16} color="gray"/>} label="Tiket" value={stats.total} color="text-white" />
-                                <StatCard icon={<ShieldCheck size={16} color="gray"/>} label="Selesai" value={`${stats.percentage}%`} color="text-emerald-400" />
-                                <StatCard icon={<Zap size={16} color="gray"/>} label="AI Node" value="Online" color="text-blue-400" />
-                                <StatCard icon={<Clock size={16} color="gray"/>} label="Kecepatan" value={`${stats.latency}s`} color="text-purple-400" />
+                                <StatCard icon={<Activity size={16} color="gray" />} label="Tiket" value={stats.total} color="text-white" />
+                                <StatCard icon={<ShieldCheck size={16} color="gray" />} label="Selesai" value={`${stats.percentage}%`} color="text-emerald-400" />
+                                <StatCard icon={<Zap size={16} color="gray" />} label="AI Node" value="Online" color="text-blue-400" />
+                                <StatCard icon={<Clock size={16} color="gray" />} label="Kecepatan" value={`${stats.latency}s`} color="text-purple-400" />
                             </div>
 
                             {/* Main Dashboard Area - Menggunakan flex-1 dan min-h-0 agar elastis */}
@@ -677,6 +744,10 @@ export default function AdminDashboard() {
                                     <h1 className="text-3xl font-bold text-white tracking-tighter">Tempat Semua Tiket</h1>
                                     <p className="text-zinc-500 text-sm mt-1 font-medium decoration-zinc-500/30">Total dari {tickets.length} tiket terdeteksi oleh sistem.</p>
                                 </div>
+                                <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-zinc-500/50 transition-all">
+                                    <Search size={14} className="text-zinc-600 group-focus-within:text-zinc-400" />
+                                    <input type="text" value={searchQuery} placeholder="Cari Tiket..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
+                                </div>
                             </div>
 
                             <div className="bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
@@ -691,6 +762,7 @@ export default function AdminDashboard() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-zinc-900/40 ">
+
                                         {filteredTickets.map((t) => (
                                             <tr key={t.id} className="group hover:bg-white/[0.02] transition-all duration-300">
                                                 <td className="pl-10 pr-6 py-7">
@@ -787,6 +859,74 @@ export default function AdminDashboard() {
                                 </table>
                             </div>
                         </div>
+
+                    ) : activeTab === 'manage_admin' ? (
+                        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            {/* Header Section */}
+                            <div className="flex items-center justify-between mb-10">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white tracking-tighter">Kelola Admin</h1>
+                                    <p className="text-zinc-500 text-sm mt-1 font-medium">
+                                        Manajemen akses dan kredensial administrator sistem
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Table Container */}
+                            <div className="bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-zinc-900/50 text-left bg-white/[0.02]">
+                                                <th className="pl-10 pr-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Administrator</th>
+                                                <th className="pl-40 pr-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Joined Date</th>
+                                                <th className="pl-10 pr-30 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Access Email</th>
+                                                <th className="pl-10 pr-6 py-6 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-zinc-900/30">
+                                            {/* Contoh Mapping Data (Ganti dengan state admins kamu) */}
+                                            {admins.map((admin) => (
+                                                <tr key={admin.id} className="group hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-xs uppercase shadow-inner">
+                                                                {admin.name.substring(0, 1)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-white tracking-tight">{admin.name}</p>
+                                                                <p className="text-[10px] text-zinc-600 font-medium italic">Verified Admin</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-40 py-6 whitespace-nowrap">
+                                                        <span className="text-zinc-400 text-sm">
+                                                            {new Date(admin.createdAt).toLocaleDateString('id-ID', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-8 py-6 text-sm text-zinc-400 font-mono">
+                                                        {admin.email}
+                                                    </td>
+                                                    <td className="px-12 py-6 ">
+                                                        <button
+                                                            onClick={() => handleDeleteAdmin(admin.id)}
+                                                            className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all group/del shadow-lg shadow-red-500/5"
+                                                        >
+                                                            <Trash2 size={16} className="group-hover/del:scale-110 transition-transform" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
                     ) : activeTab === 'add_admin' ? (
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
                             {/* Header Section - Identik dengan style Tickets */}
@@ -985,7 +1125,7 @@ export default function AdminDashboard() {
                                             onClick={handleSendReply}
                                             title="Send Reply" // Menghilangkan error "Buttons must have discernible text"
                                             aria-label="Send reply to ticket" // Standar aksesibilitas untuk screen reader
-                                            className="p-3 bg-zinc-600 text-white rounded-xl hover:bg-zinc-500 transition-all active:scale-95 flex items-center justify-center"
+                                            className="p-3 bg-zinc-700 text-white rounded-xl hover:bg-zinc-600 transition-all active:scale-95 flex items-center justify-center"
                                         >
                                             <Send size={18} />
                                         </button>

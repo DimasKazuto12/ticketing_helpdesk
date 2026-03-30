@@ -370,3 +370,57 @@ export async function getAdminProfile() {
 
   return admin;
 }
+
+// Tambahkan di bagian paling bawah file action.ts
+export async function deleteAdminAction(id: number) {
+  try {
+    // 1. Cek dulu apakah admin tersebut ada
+    const admin = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!admin) {
+      return { success: false, message: "Admin not found in Neural Database" };
+    }
+
+    // 2. Eksekusi penghapusan
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    // 3. Refresh cache agar tabel di dashboard langsung update
+    revalidatePath("/dashboard_admin");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete Admin Error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Critical System Failure during wiping"
+    };
+  }
+}
+
+export async function getAdminsAction() {
+  try {
+    const admins = await prisma.user.findMany({
+      where: { 
+        role: "admin" // Sesuai enum UserRole di schema kamu
+      },
+      select: { 
+        id: true, 
+        name: true, 
+        email: true,
+        createdAt: true
+      },
+      orderBy: { 
+        createdAt: "desc" 
+      }
+    });
+
+    return { success: true, data: admins };
+  } catch (error) {
+    console.error("Neural Error during fetching admins:", error);
+    return { success: false, message: "Gagal mengambil data admin" };
+  }
+}

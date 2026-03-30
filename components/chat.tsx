@@ -237,7 +237,7 @@ export default function ChatInterface({
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        className="bg-transparent border-none outline-none text-zinc-100 placeholder-zinc-600 flex-1"
+                        className="border-none outline-none flex-1 bg-transparent border-none focus:ring-0 text-sm text-white py-3 resize-none max-h-32"
                         disabled={ticketStatus === 'closed'}
                     />
 
@@ -252,7 +252,6 @@ export default function ChatInterface({
                             }
                         }}
                         disabled={isLoading || (!message.trim() && !attachment) || ticketStatus === 'closed'}
-                        style={{ opacity: (message.trim() || attachment) && ticketStatus !== 'closed' ? 1 : 0.5 }}
                     >
                         <Send size={18} />
                     </button>
