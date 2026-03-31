@@ -25,7 +25,7 @@ export const AdminReplyEmail = ({ ticketCode, replyMessage }: { ticketCode: stri
         </Section>
 
         <Section style={buttonContainer}>
-          <Button style={button} href={`${process.env.NEXT_PUBLIC_APP_URL}/results/${ticketCode}`}>
+          <Button style={button} href={`${process.env.NEXT_RESPONSIVE_URL}/results/${ticketCode}`}>
             Lihat & Balas Chat
           </Button>
         </Section>

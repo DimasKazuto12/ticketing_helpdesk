@@ -344,6 +344,21 @@
     align-items: flex-start;
   }
 
+  .chipValue {
+    font-size: 10px;
+  }
+
+  .inputWrapper {
+    padding: 10px 15px; /* Padding kiri kanan */
+    width: 100%;
+    display: block; /* Pastikan dia block agar tidak overflow */
+  }
+
+  .inputBar {
+    width: 100%; /* Karena border-box, dia akan pas di dalam 15px tadi */
+    margin: 0;   /* Pastikan tidak ada margin tambahan yang mendorong keluar */
+  }
+
   .systemBadge span {
     font-size: 10px;
   }
@@ -351,6 +366,11 @@
   .trackingChip {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .sendButtonActive {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   /* Judul tiket jangan terlalu besar */

@@ -721,7 +721,7 @@
   }
 
   .parallaxSection {
-    height: 50vh;
+    height: 40vh;
     padding: 2rem 0;
   }
 
@@ -770,7 +770,8 @@
 /* --- OPTIMALISASI KHUSUS LAYAR SANGAT KECIL (Max-Width 480px) --- */
 @media (max-width: 480px) {
   .title {
-    font-size: 28px;
+    font-size: 30px;
+    margin-top: 60px;
   }
 
   .navLink {
