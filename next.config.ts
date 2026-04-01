@@ -6,14 +6,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  eslint: {
-    // Ini perintah biar Vercel nggak ngecek ESLint pas build
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Ini perintah biar Vercel nggak ngecek Type Error pas build
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

@@ -84,12 +84,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
-
-// Tambahkan ini jika kamu mengirim gambar Base64 yang besar
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};

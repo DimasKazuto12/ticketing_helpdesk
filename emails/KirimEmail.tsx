@@ -23,7 +23,7 @@ export const TicketCreatedEmail = ({ ticketCode, title }: { ticketCode: string, 
         </Section>
 
         <Section style={buttonContainer}>
-          <Button style={button} href={`${process.env.NEXT_PUBLIC_APP_URL}/track_ticket`}>
+          <Button style={button} href={`${process.env.NEXT_RESPONSIVE_URL}/track_ticket`}>
             Lacak Status Tiket
           </Button>
         </Section>

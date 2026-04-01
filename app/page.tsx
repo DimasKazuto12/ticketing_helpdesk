@@ -1,7 +1,7 @@
 "use client";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Search, User, Github, Facebook, Linkedin, Cpu, ShieldCheck, Headphones } from "lucide-react";
+import { Search, Github, Facebook, Linkedin, Cpu, ShieldCheck, Headphones } from "lucide-react";
 import Link from "next/link";
 import style from './home.module.css';
 

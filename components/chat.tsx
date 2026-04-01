@@ -5,7 +5,6 @@ import styles from '../app/results/[code]/results.module.css';
 import VoiceController from './VoiceController';
 import Pusher from 'pusher-js';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image'
 
 interface Reply {
     id: number;
@@ -185,7 +184,7 @@ export default function ChatInterface({
 
                             {r.attachment && (
                                 <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/20">
-                                    <Image
+                                    <img
                                         src={r.attachment}
                                         alt="Neural Attachment"
                                         className="max-w-full h-auto max-h-[300px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
