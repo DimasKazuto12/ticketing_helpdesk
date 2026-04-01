@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { Volume2, Settings, Globe, Play } from 'lucide-react'; // Pastikan sudah install lucide-react
+import { Volume2, Settings, Play } from 'lucide-react'; // Pastikan sudah install lucide-react
 
 export default function VoiceController({ textToSpeak }: { textToSpeak: string }) {
     const [isOpen, setIsOpen] = useState(false);

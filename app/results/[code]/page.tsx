@@ -22,7 +22,11 @@ async function getTicketData(code: string) {
   return ticket;
 }
 
-export default async function ProfessionalTicketResults({ params }: { params: { code: string } }) {
+export default async function ProfessionalTicketResults({
+  params
+}: {
+  params: Promise<{ code: string }>
+}) {
   const resolvedParams = await params;
   const code = resolvedParams.code;
   const ticket = await getTicketData(code);

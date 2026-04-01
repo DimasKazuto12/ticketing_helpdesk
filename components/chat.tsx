@@ -5,11 +5,22 @@ import styles from '../app/results/[code]/results.module.css';
 import VoiceController from './VoiceController';
 import Pusher from 'pusher-js';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'
+
+interface Reply {
+    id: number;
+    ticketId: number;
+    userId?: number | null;
+    senderType: 'admin' | 'client'; // Harus sinkron dengan enum SenderType
+    message: string;
+    attachment?: string | null;
+    createdAt: string | Date;
+}
 
 interface ChatInterfaceProps {
     ticketId: number;
     initialDescription: string;
-    existingReplies: any[];
+    existingReplies: Reply[];
     aiSummary?: string;
     ticketStatus: string;
 }
@@ -56,7 +67,7 @@ export default function ChatInterface({
 
         const channel = pusher.subscribe(`ticket-${ticketId}`);
 
-        channel.bind('new-reply', (data: any) => {
+        channel.bind('new-reply', (data: Reply) => {
             setReplies((prev) => {
                 // Cukup cek apakah ID pesan ini sudah ada di layar (cegah duplikat standar)
                 const isAlreadyThere = prev.some(r => r.id === data.id);
@@ -78,7 +89,7 @@ export default function ChatInterface({
             pusher.unsubscribe(`ticket-${ticketId}`);
             pusher.disconnect();
         };
-    }, [ticketId]);
+    }, [ticketId, router]);
 
 
     const handleSend = async () => {
@@ -102,7 +113,7 @@ export default function ChatInterface({
                     ticketId,
                     message: currentMsg || "Sent an attachment",
                     attachment: currentAttachment,
-                    sender: 'USER'
+                    sender: 'client'
                 }),
             });
 
@@ -174,11 +185,11 @@ export default function ChatInterface({
 
                             {r.attachment && (
                                 <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/20">
-                                    <img
+                                    <Image
                                         src={r.attachment}
                                         alt="Neural Attachment"
                                         className="max-w-full h-auto max-h-[300px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
-                                        onClick={() => setSelectedImage(r.attachment)}
+                                        onClick={() => setSelectedImage(r.attachment ?? null)}
                                     />
                                 </div>
                             )}

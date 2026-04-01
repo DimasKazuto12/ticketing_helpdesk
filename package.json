@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -44,7 +45,7 @@
     "@types/react-dom": "^19",
     "@types/react-google-recaptcha": "^2.1.9",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "15.1.0",
     "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
