@@ -59,9 +59,6 @@ export default function LoginPage() {
                 }}
             />
             <div className={style.loginBackground}>
-                <div className={style.starsLayerSmall}></div>
-                <div className={style.starsLayerMedium}></div>
-
                 <main className={style.loginWrapper}>
                     <div className={style.loginCard}>
                         <div className={style.header}>

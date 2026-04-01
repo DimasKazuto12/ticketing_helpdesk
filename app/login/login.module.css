@@ -32,43 +32,6 @@
   z-index: 5;
 }
 
-.starsSmall {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-image: 
-    radial-gradient(2px 2px at 10% 20%, #ffffff, transparent),
-    radial-gradient(1.5px 1.5px at 30% 50%, #b91010, transparent),
-    radial-gradient(2px 2px at 70% 80%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 90% 10%, #fff, transparent);
-  background-size: 300px 300px; /* Diulang setiap 300px */
-  opacity: 0.4;
-  animation: twinkle 5s infinite;
-}
-
-.starsLayerSmall,
-.starsLayerMedium {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.starsLayerSmall {
-  background-image: radial-gradient(2px 2px at center, #fff, rgba(0, 0, 0, 0));
-  background-size: 100px 100px;
-  opacity: 0.3;
-  animation: starsScroll 30s linear infinite;
-}
-
-.starsLayerMedium {
-  background-image: radial-gradient(2.5px 2.5px at center, #fff, rgba(0, 0, 0, 0));
-  background-size: 250px 250px;
-  opacity: 0.2;
-  animation: starsScroll 60s linear infinite;
-}
-
 .header {
   text-align: center;
   margin-bottom: 32px;
@@ -191,28 +154,7 @@
   }
 }
 
-@keyframes pulseOrange {
-  0% { 
-    opacity: 0.4; 
-    transform: scale(1) translateY(0); 
-  }
-  100% { 
-    opacity: 0.7; 
-    transform: scale(1.1) translateY(-20px); 
-  }
-}
-
 @keyframes drift {
   from { transform: translate(0, 0) scale(1); opacity: 0.5; }
   to { transform: translate(5%, 5%) scale(1.2); opacity: 0.8; }
-}
-
-@keyframes starsScroll {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(-100vh);
-  }
 }

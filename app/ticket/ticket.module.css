@@ -155,47 +155,6 @@
   transform: translateY(-1px);
 }
 
-.starsLayerSmall,
-.starsLayerMedium,
-.starsLayerLarge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100vh;
-  /* Hanya di area hero section */
-  pointer-events: none;
-}
-
-.starsLayerSmall {
-  z-index: 1;
-  background-image: radial-gradient(3px 3px at center, #ffffff, rgba(0, 0, 0, 0));
-  background-size: 150px 150px;
-  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
-  opacity: 0.2;
-  animation: starsScroll 30s linear infinite;
-}
-
-.starsLayerMedium {
-  z-index: 2;
-  background-image: radial-gradient(4px 4px at center, #ffffff, rgba(0, 0, 0, 0));
-  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
-  background-size: 250px 250px;
-  opacity: 0.3;
-  animation: starsScroll 60s linear infinite;
-}
-
-.starsLayerLarge {
-  z-index: 3;
-  background-image: radial-gradient(5px 5px at center, #ffffff, rgba(0, 0, 0, 0));
-  box-shadow: 100px 200px #fff, 400px 500px #fff, 800px 100px #fff, 200px 800px #fff, 600px 300px #fff, 900px 700px #fff;
-  background-size: 400px 400px;
-  opacity: 0.15;
-  animation: starsScroll 90s linear infinite;
-}
-
 .fileButton {
   display: flex;
   align-items: center;
@@ -230,16 +189,6 @@
   }
 }
 
-@keyframes starsScroll {
-  from {
-    transform: translateY(0px);
-  }
-
-  to {
-    transform: translateY(100vh);
-  }
-}
-
 @media (max-width: 640px) {
   .glassCard {
     padding: 20px 20px;
@@ -256,25 +205,6 @@
   .flex.items-center.gap-4.pt-2 {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .starsLayerSmall {
-    width: 3px; /* Perkecil lagi di HP */
-    height: 3px;
-    box-shadow: 0 0 5px white;
-  }
-
-  .starsLayerMedium {
-    width: 4px;
-    height: 4px;
-    opacity: 0.6;
-  }
-
-  .starsLayerLarge {
-    width: 5px;
-    height: 5px;
-    opacity: 0.4;
-    filter: blur(1px); /* Beri sedikit blur agar tidak tajam kotaknya */
   }
 
   .background :global([data-sonner-toaster]) {

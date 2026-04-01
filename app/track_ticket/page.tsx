@@ -67,10 +67,6 @@ export default function TrackTicketPage() {
                 }}
             />
 
-            <div className={styles.starsLayerSmall}></div>
-            <div className={styles.starsLayerMedium}></div>
-            <div className={styles.starsLayerLarge}></div>
-
             <Link href="/" className="fixed top-5 left-4 z-50 flex items-center gap-2 text-zinc-500 hover:text-white transition-all text-xs uppercase tracking-[0.2em]">
                 <ChevronLeft size={16} /> Back
             </Link>

@@ -100,9 +100,6 @@ export default function TicketPage() {
           },
         }}
       />
-      <div className={styles.starsLayerSmall}></div>
-      <div className={styles.starsLayerMedium}></div>
-      <div className={styles.starsLayerLarge}></div>
 
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <Link href="/" className="fixed top-5 left-4 z-50 flex items-center gap-2 text-zinc-500 hover:text-white transition-all text-xs uppercase tracking-[0.2em]">
