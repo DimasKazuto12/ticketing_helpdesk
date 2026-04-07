@@ -178,7 +178,7 @@ export default function ChatInterface({
                             ? 'bg-zinc-800/50 border border-zinc-700/50'
                             : 'bg-blue-600/20 border border-blue-500/30'
                             }`}>
-                            <p className="text-[10px] uppercase opacity-50 mb-1 tracking-wider font-bold">
+                            <p className="text-[10px] uppercase opacity-50 tracking-wider font-bold">
                                 {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
                             </p>
 
@@ -217,10 +217,11 @@ export default function ChatInterface({
             {/* INPUT SECTION */}
             <div className={styles.inputWrapper}>
                 {attachment && (
-                    <div className="mb-2 flex items-center gap-2 p-2 bg-zinc-900 border border-zinc-700 rounded w-fit">
-                        <img src={attachment} className="h-10 w-10 object-cover rounded" alt="preview" />
-                        <span className="text-xs text-zinc-400">image_payload.dat</span>
-                        <button onClick={() => setAttachment(null)} className="text-red-500"><X size={14} /></button>
+                    <div className="relative mb-2 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
+                            <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
+                            <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
+                        </div>
                     </div>
                 )}
 

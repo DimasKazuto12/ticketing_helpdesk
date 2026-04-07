@@ -5,7 +5,14 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+
   },
+
+  allowedDevOrigins: [
+    'andree-unbedaubed-unmajestically.ngrok-free.dev',
+    'localhost:3000'
+  ],
+
 };
 
 export default nextConfig;

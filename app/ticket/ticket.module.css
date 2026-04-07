@@ -175,20 +175,6 @@
   color: white;
 }
 
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: translateX(-50%) scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.05);
-  }
-}
-
 @media (max-width: 640px) {
   .glassCard {
     padding: 20px 20px;

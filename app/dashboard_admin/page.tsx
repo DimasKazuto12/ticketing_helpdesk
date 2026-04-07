@@ -1070,9 +1070,9 @@ export default function AdminDashboard() {
                                 <div className="relative group">
                                     {/* Preview Gambar (Muncul melayang di atas input jika ada file) */}
                                     {attachmentPreview && (
-                                        <div className="absolute bottom-full left-0 mb-4 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2">
+                                        <div className="absolute bottom-full left-0 mb-3 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2">
                                             <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                                                <img src={attachmentPreview} alt="preview" className="w-full h-full object-cover" />
+                                                <img src={attachmentPreview} alt="preview" className="w-full h-full object-cover" onClick={() => setSelectedImage(attachmentPreview)}/>
                                                 <button
                                                     onClick={() => { setAttachment(null); setAttachmentPreview(null); }}
                                                     className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"

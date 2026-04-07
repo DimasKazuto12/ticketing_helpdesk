@@ -379,6 +379,10 @@
     line-height: 1.4;
   }
 
+  .bubbleAdmin .bubbleClient {
+    width: 20%;
+  }
+
   /* Detail Grid (Category & Timestamp) jadi 2 kolom kecil */
   .detailGrid {
     grid-template-columns: 1fr 1fr;
