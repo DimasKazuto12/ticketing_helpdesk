@@ -39,6 +39,7 @@ model Ticket {
   attachment    String?
   status        TicketStatus  @default(open)
   priority      Priority      @default(low)
+  isAiActive      Boolean       @default(false) @map("is_ai_active")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
   aiSuggestions AiSuggestion?
@@ -53,6 +54,7 @@ model TicketReply {
   ticketId   Int        @map("ticket_id")
   userId     Int?       @map("user_id")
   senderType SenderType @map("sender_type")
+  isAi        Boolean    @default(false) @map("is_ai")
   message    String
   attachment String?
   createdAt  DateTime   @default(now()) @map("created_at")

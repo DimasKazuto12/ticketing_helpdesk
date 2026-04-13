@@ -173,12 +173,12 @@ export default function ChatInterface({
 
                 {/* 3. REPLIES MAPPING */}
                 {replies.map((r, i) => (
-                    <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-start' : 'justify-end'}`}>
+                    <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${r.senderType === 'client'
                             ? 'bg-zinc-800/50 border border-zinc-700/50'
                             : 'bg-blue-600/20 border border-blue-500/30'
                             }`}>
-                            <p className="text-[10px] uppercase opacity-50 tracking-wider font-bold">
+                            <p className="text-[10px] uppercase opacity-50 tracking-wider font-bold mb-2">
                                 {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
                             </p>
 

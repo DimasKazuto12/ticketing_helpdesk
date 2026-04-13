@@ -5,6 +5,7 @@ import { AdminReplyEmail } from "@/emails/ReplyAdmin"; // Template yang kita bua
 import nodemailer from "nodemailer";
 import Pusher from 'pusher';
 import { v2 as cloudinary } from 'cloudinary';
+import { autoAiReplyAction } from '@/app/dashboard_admin/action';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
     });
 
     // 2. TRIGGER PUSHER (Jangan pakai await, biarkan jalan di background)
+    pusher.trigger(`admin-updates`, 'new-reply', newReply).catch(e => console.error(e));
     pusher.trigger(`ticket-${ticketId}`, 'new-reply', newReply).catch(e => console.error(e));
 
     // 3. KIRIM EMAIL (INI YANG PALING LAMBAT - Jangan pakai await!)
@@ -74,7 +76,26 @@ export async function POST(req: Request) {
             });
           }
         } catch (err) { console.error("Background Email Error:", err); }
-      })(); 
+      })();
+    }
+
+    if (sender !== 'ADMIN') {
+      (async () => {
+        try {
+          const ticket = await prisma.ticket.findUnique({
+            where: { id: Number(ticketId) },
+            select: { isAiActive: true }
+          });
+
+          if (ticket?.isAiActive) {
+            // Jalankan AI untuk membalas secara otomatis
+            // Kita pakai finalAttachmentUrl supaya AI bisa liat gambar yang sudah diupload ke Cloudinary
+            await autoAiReplyAction(Number(ticketId), message, finalAttachmentUrl);
+          }
+        } catch (aiErr) {
+          console.error("AI Background Process Error:", aiErr);
+        }
+      })();
     }
 
     // 4. LANGSUNG KIRIM RESPON (API akan selesai dalam < 200ms)

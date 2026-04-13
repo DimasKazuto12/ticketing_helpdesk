@@ -18,6 +18,8 @@ import VoiceController from '@/components/VoiceController';
 import Pusher from 'pusher-js';
 import { useMemo } from "react";
 import Image from 'next/image';
+import ChatbotToggle from '@/components/chatbot';
+import AiBubble from '@/components/aiBubble'
 
 interface ChatMessage {
     role: 'user' | 'admin';
@@ -77,6 +79,35 @@ export default function AdminDashboard() {
         status: "in_progress"
     });
 
+    // Di dalam export default function AdminDashboard()
+    useEffect(() => {
+        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+        });
+
+        const channel = pusher.subscribe('admin-events');
+
+        // JEMBATAN PENTING:
+        // Ketika tombol Chatbot (Global) diklik, fungsi ini akan mengupdate list tiket di layar
+        channel.bind('global-ai-update', (data: { isActive: boolean }) => {
+            setTickets((prevTickets) =>
+                prevTickets.map((t) => ({
+                    ...t,
+                    isAiActive: data.isActive
+                }))
+            );
+
+            // Jika tiket yang sedang dibuka termasuk yang kena update, sinkronkan juga detailnya
+            if (selectedTicket) {
+                setSelectedTicket((prev: any) => ({ ...prev, isAiActive: data.isActive }));
+            }
+        });
+
+        return () => {
+            pusher.unsubscribe('admin-events');
+        };
+    }, [selectedTicket]); // Re-bind kalau selectedTicket berubah agar detailnya ikut sinkron
+
     useEffect(() => {
         const fetchAdmin = async () => {
             const data = await getAdminProfile();
@@ -108,29 +139,8 @@ export default function AdminDashboard() {
             setTickets(prev => prev.filter(t => t.id !== data.id));
         });
 
-        return () => {
-            adminChannel.unbind_all();
-            pusher.unsubscribe('admin-updates');
-        };
-    }, []);
-
-    // Effect Chat Spesifik
-    useEffect(() => {
-        if (!selectedTicket?.id || !pusherRef.current) return;
-
-        const pusher = pusherRef.current;
-        const chatChannel = pusher.subscribe(`ticket-${selectedTicket.id}`);
-
-        const handleNewReply = (newReply: any) => {
-            // UPDATE SELECTED TICKET
-            setSelectedTicket((prev: any) => {
-                if (!prev || prev.id !== newReply.ticketId) return prev;
-                const isExist = prev.replies?.some((r: any) => r.id === newReply.id);
-                if (isExist) return prev;
-                return { ...prev, replies: [...(prev.replies || []), newReply] };
-            });
-
-            // UPDATE TICKETS LIST
+        adminChannel.bind('new-reply', (newReply: any) => {
+            // Update list tiket agar preview pesan di sidebar ikut update
             setTickets(prev => prev.map(t => {
                 if (t.id === newReply.ticketId) {
                     const isExist = t.replies?.some((r: any) => r.id === newReply.id);
@@ -139,15 +149,23 @@ export default function AdminDashboard() {
                 }
                 return t;
             }));
-        };
 
-        chatChannel.bind('new-reply', handleNewReply);
+            // Update detail yang sedang terbuka secara real-time
+            setSelectedTicket((prev: any) => {
+                if (prev?.id === newReply.ticketId) {
+                    const isExist = prev.replies?.some((r: any) => r.id === newReply.id);
+                    if (isExist) return prev;
+                    return { ...prev, replies: [...(prev.replies || []), newReply] };
+                }
+                return prev;
+            });
+        });
 
         return () => {
-            chatChannel.unbind('new-reply', handleNewReply);
-            pusher.unsubscribe(`ticket-${selectedTicket.id}`);
+            adminChannel.unbind_all();
+            pusher.unsubscribe('admin-updates');
         };
-    }, [selectedTicket?.id]);
+    }, []);
 
     useEffect(() => {
         if (selectedTicket?.replies) {
@@ -240,7 +258,9 @@ export default function AdminDashboard() {
     }, [data, tickets]); // <--- Tambahkan 'tickets' di dependency agar angka update saat ada tiket baru
 
     const openDetail = (ticket: any) => {
-        setSelectedTicket(ticket);
+        const latestData = tickets.find(t => t.id === ticket.id) || ticket;
+
+        setSelectedTicket(latestData);
         setIsAnalyzing(false);
 
         const priorityMap: { [key: string]: string } = {
@@ -740,13 +760,27 @@ export default function AdminDashboard() {
                     ) : activeTab === 'tickets' ? (
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center justify-between mb-10">
+
                                 <div>
                                     <h1 className="text-3xl font-bold text-white tracking-tighter">Tempat Semua Tiket</h1>
                                     <p className="text-zinc-500 text-sm mt-1 font-medium decoration-zinc-500/30">Total dari {tickets.length} tiket terdeteksi oleh sistem.</p>
                                 </div>
-                                <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-zinc-500/50 transition-all">
-                                    <Search size={14} className="text-zinc-600 group-focus-within:text-zinc-400" />
-                                    <input type="text" value={searchQuery} placeholder="Cari Tiket..." className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700" onChange={(e) => setSearchQuery(e.target.value)} />
+                                <div className="flex items-center gap-4">
+
+                                    {/* TOMBOL ON/OFF AI - Simple & Compact */}
+                                    <ChatbotToggle />
+
+                                    {/* SEARCH BAR KAMU */}
+                                    <div className="flex items-center bg-zinc-900/30 border border-zinc-800 px-4 py-2.5 rounded-2xl w-96 group focus-within:border-zinc-500/50 transition-all">
+                                        <Search size={14} className="text-zinc-600 group-focus-within:text-zinc-400" />
+                                        <input
+                                            type="text"
+                                            value={searchQuery}
+                                            placeholder="Cari Tiket..."
+                                            className="bg-transparent border-none outline-none text-xs w-full ml-3 text-white placeholder:text-zinc-700"
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -1029,38 +1063,50 @@ export default function AdminDashboard() {
 
                                 {/* Histori Balasan (Map dari data balasanmu nanti) */}
                                 {/* Area di mana chat seharusnya muncul */}
-                                <div className="p-4 space-y-4">
-                                    {/* Cari bagian ini di kode kamu */}
+                                <div className="p-7 space-y-4">
+                                    {selectedTicket?.replies?.map((msg: any, index: number) => {
+                                        // 1. CEK APAKAH INI CHAT DARI AI
+                                        if (msg.senderType === 'bot' || msg.senderType === 'ai') {
+                                            return (
+                                                <AiBubble
+                                                    key={index}
+                                                    message={msg.message}
+                                                    timestamp={new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                />
+                                            );
+                                        }
 
-                                    {selectedTicket?.replies?.map((msg: any, index: number) => (
-                                        <div key={index} className={`flex w-full mb-4 ${msg.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                                            <div className={`max-w-[80%] p-3 rounded-lg ${msg.senderType === 'admin' ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-zinc-800/50 border border-zinc-700/50'}`}>
-                                                <p className="text-[10px] uppercase opacity-50 mb-1">
-                                                    {msg.senderType === 'admin' ? 'ADMIN_RESPONSE' : 'CLIENT_REQUEST'}
-                                                </p>
+                                        // 2. CHAT MANUSIA (ADMIN ATAU CLIENT)
+                                        return (
+                                            <div key={index} className={`flex w-full mb-10 ${msg.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[80%] p-3 rounded-lg ${msg.senderType === 'admin' ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-zinc-800/50 border border-zinc-700/50'}`}>
+                                                    <p className="text-[10px] uppercase opacity-50 mb-2">
+                                                        {msg.senderType === 'admin' ? 'ADMIN_RESPONSE' : 'CLIENT_REQUEST'}
+                                                    </p>
 
-                                                {/* TAMBAHKAN LOGIKA GAMBAR DI SINI */}
-                                                {msg.attachment && (
-                                                    <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner">
-                                                        <img
-                                                            src={msg.attachment}
-                                                            alt="Neural Attachment"
-                                                            className="max-w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
-                                                            onClick={() => setSelectedImage(msg.attachment)}
-                                                        />
-                                                    </div>
-                                                )}
+                                                    {/* ATTACHMENT */}
+                                                    {msg.attachment && (
+                                                        <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner">
+                                                            <img
+                                                                src={msg.attachment}
+                                                                alt="Neural Attachment"
+                                                                className="max-w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                                                onClick={() => setSelectedImage(msg.attachment)}
+                                                            />
+                                                        </div>
+                                                    )}
 
-                                                {/* PESAN TEKS */}
-                                                {msg.message && <p className="text-sm text-zinc-100 leading-relaxed">{msg.message}</p>}
+                                                    {/* PESAN TEKS */}
+                                                    {msg.message && <p className="text-sm text-zinc-100 leading-relaxed">{msg.message}</p>}
 
-                                                {/* TIMESTAMP OPSIONAL */}
-                                                <p className="text-[8px] mt-2 opacity-30 text-right">
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                                    {/* TIMESTAMP */}
+                                                    <p className="text-[8px] mt-2 opacity-30 text-right">
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     <div ref={chatEndRef} />
                                 </div>
                             </div>
@@ -1072,7 +1118,7 @@ export default function AdminDashboard() {
                                     {attachmentPreview && (
                                         <div className="absolute bottom-full left-0 mb-3 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2">
                                             <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                                                <img src={attachmentPreview} alt="preview" className="w-full h-full object-cover" onClick={() => setSelectedImage(attachmentPreview)}/>
+                                                <img src={attachmentPreview} alt="preview" className="w-full h-full object-cover" onClick={() => setSelectedImage(attachmentPreview)} />
                                                 <button
                                                     onClick={() => { setAttachment(null); setAttachmentPreview(null); }}
                                                     className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"

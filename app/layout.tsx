@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SessionTimeout from "@/components/SessionTimeout";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +24,28 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            // Styling Global
+            style: {
+              background: 'rgba(255, 255, 255, 0.05)', // Transparan tipis
+              backdropFilter: 'blur(10px)',             // Efek blur kaca
+              WebkitBackdropFilter: 'blur(10px)',       // Support Safari
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              color: '#fff',
+              fontSize: '14px',
+              padding: '12px 16px',
+            },
+          }}
+        />
         <SessionTimeout />
         {children}
       </body>

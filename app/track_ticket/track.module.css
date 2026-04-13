@@ -83,7 +83,7 @@
     padding: 2rem; /* Kurangi padding agar tidak sesak */
     width: 92%;      /* Card tidak mentok ke pinggir layar */
     border-radius: 20px;
-    margin-top: 2rem; /* Beri ruang untuk tombol back */
+    margin-bottom: 5rem; /* Beri ruang untuk tombol back */
   }
 
   /* Perkecil Header */

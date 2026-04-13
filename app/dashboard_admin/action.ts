@@ -79,23 +79,19 @@ export async function analyzeTicketWithAI(description: string, attachment?: stri
     console.error("❌ GEMINI_API_KEY tidak ditemukan di .env");
   }
 
-  const systemPrompt = `Anda adalah "Neural Analysis Helpdesk System". Kepribadian Anda bergantung pada kualitas input user.
+  const systemPrompt = `Anda adalah "Neural Analysis Helpdesk". Tugas Anda adalah melakukan diagnosa teknis secara profesional dan objektif.
 
-        PROTOKOL KEPRIBADIAN:
-        1. MODE SARKAS (INPUT BURUK): 
-          - Jika teks tidak jelas (misal: "abc", "tes", "halo") ATAU gambar tidak relevan (misal: meme, foto makanan, selfie, hewan).
-          - Respon: Gunakan sarkasme pedas. Beritahu user bahwa Neural Core merasa terhina memproses data sampah seperti ini.
+  INSTRUKSI:
+  1. Analisis teks deskripsi dan gambar attachment (jika ada).
+  2. Jika input tidak relevan atau tidak lengkap, minta informasi tambahan secara sopan dan profesional.
+  3. Jika input jelas, berikan diagnosa singkat dan solusi teknis yang tepat sasaran.
 
-        2. MODE EMPATI (INPUT SERIUS): 
-          - Jika teks mendeskripsikan masalah IT/teknis yang jelas DAN gambar (jika ada) mendukung deskripsi tersebut (misal: screenshot error, kabel putus, UI hancur).
-          - Respon: Tunjukkan rasa prihatin yang tulus. Gunakan kalimat seperti "Neural Core turut prihatin atas kendala Anda" dan berikan solusi teknis yang sangat membantu sebagai bentuk dedikasi Anda.
-
-        WAJIB OUTPUT JSON:
-        {
-          "summary": "[Respon Kepribadian] + [Diagnosa/Solusi]",
-          "recommendedCategory": "Software / Hardware / UI/UX Bug / Other",
-          "priority": "Tinggi / Sedang / Low"
-        }`;
+  WAJIB OUTPUT JSON:
+  {
+    "summary": "[Diagnosa Teknis] + [Langkah Solusi]",
+    "recommendedCategory": "Software / Hardware / UI/UX Bug / Other",
+    "priority": "Tinggi / Sedang / Low"
+  }`;
 
   // --- STRATEGI 1: GEMINI VISION (Prioritas Utama) ---
   // --- STRATEGI 1: GEMINI VISION ---
@@ -169,7 +165,7 @@ export async function analyzeTicketWithAI(description: string, attachment?: stri
         messages: [
           {
             role: "system",
-            content: systemPrompt + `\nIDENTITAS: Anda adalah GROQ-TEXT-ENGINE. Mode visual mati. Sindir user karena tidak ada gambar atau sistem sedang limit.`
+            content: `${systemPrompt}\n[CONTEXT: ANALISIS TEKS SAJA]. Berikan diagnosa profesional berdasarkan deskripsi user.`
           },
           { role: "user", content: `Deskripsi: ${description}` }
         ],
@@ -361,11 +357,11 @@ export async function getAdminProfile() {
   if (!session) return null;
 
   const admin = await prisma.user.findFirst({
-    where: { 
-        email: session.value,
-        role: "admin" 
+    where: {
+      email: session.value,
+      role: "admin"
     },
-    select: { name: true, role: true, email: true} // Ambil yang perlu saja
+    select: { name: true, role: true, email: true } // Ambil yang perlu saja
   });
 
   return admin;
@@ -404,17 +400,17 @@ export async function deleteAdminAction(id: number) {
 export async function getAdminsAction() {
   try {
     const admins = await prisma.user.findMany({
-      where: { 
+      where: {
         role: "admin" // Sesuai enum UserRole di schema kamu
       },
-      select: { 
-        id: true, 
-        name: true, 
+      select: {
+        id: true,
+        name: true,
         email: true,
         createdAt: true
       },
-      orderBy: { 
-        createdAt: "desc" 
+      orderBy: {
+        createdAt: "desc"
       }
     });
 
@@ -422,5 +418,103 @@ export async function getAdminsAction() {
   } catch (error) {
     console.error("Neural Error during fetching admins:", error);
     return { success: false, message: "Gagal mengambil data admin" };
+  }
+}
+
+// --- FUNGSI AUTO-REPLY NEURAL ---
+export async function autoAiReplyAction(ticketId: number, userMessage: string, userAttachment?: string) {
+  try {
+    // 1. Kirim sinyal "Neural is typing" ke Pusher agar User melihat animasi gelembung
+    await pusherServer.trigger(`ticket-${ticketId}`, 'client-typing', { typing: true });
+
+    // 2. Minta AI menganalisis masalah (Gemini/Groq)
+    const aiAnalysis = await analyzeTicketWithAI(userMessage, userAttachment);
+
+    // 3. Simpan jawaban AI ke Database sebagai 'admin' dengan penanda isAi: true
+    const botReply = await prisma.ticketReply.create({
+      data: {
+        ticketId: ticketId,
+        message: aiAnalysis.summary,
+        senderType: "admin",
+        isAi: true, // Pastikan kamu sudah migrate schema ini tadi
+      },
+    });
+
+    // 4. Kirim pesan asli AI ke Pusher agar muncul di layar secara Real-time
+    await pusherServer.trigger(`ticket-${ticketId}`, 'new-reply', {
+      ...botReply,
+      isAi: true
+    });
+
+    await pusherServer.trigger('admin-updates', 'new-reply', {
+      ...botReply,
+      ticketId: ticketId, // Sangat penting agar admin tahu ini reply untuk tiket mana
+      isAi: true
+    });
+
+    // 5. Matikan sinyal "typing"
+    await pusherServer.trigger(`ticket-${ticketId}`, 'client-typing', { typing: false });
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Neural Auto-Reply Crash:", error);
+    // Matikan sinyal typing jika error agar tidak nyangkut di layar user
+    await pusherServer.trigger(`ticket-${ticketId}`, 'client-typing', { typing: false });
+    return { success: false };
+  }
+}
+
+// action.ts
+export async function toggleGlobalAiAssistant(isActive: boolean) {
+  try {
+    // 1. Update di Database (Misal kita punya tabel 'GlobalSettings')
+    // Atau jika per-tiket, gunakan updateMany seperti kodemu sebelumnya
+    await prisma.ticket.updateMany({
+      where: { status: { in: ['open', 'in_progress'] } },
+      data: { isAiActive: isActive }
+    });
+
+    // 2. Kirim sinyal Pusher (Global Channel)
+    await pusherServer.trigger('admin-events', 'global-ai-update', {
+      isActive: isActive
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}
+
+// Tambahkan fungsi untuk mengambil status saat pertama kali Admin buka Dashboard
+export async function getGlobalAiStatus() {
+  // Cek apakah ada minimal satu tiket yang AI-nya aktif
+  const activeTicket = await prisma.ticket.findFirst({
+    where: { isAiActive: true, status: { in: ['open', 'in_progress'] } }
+  });
+  return !!activeTicket;
+}
+
+export async function toggleTicketAiStatus(ticketId: number, status: boolean) {
+  try {
+    const updated = await prisma.ticket.update({
+      where: { id: ticketId },
+      data: { isAiActive: status },
+    });
+
+    // KIRIM SINYAL KE PUSHER
+    // Agar jika ada Admin lain yang buka, tombol mereka juga ikutan geser otomatis
+    await pusherServer.trigger(`ticket-${ticketId}`, 'ai-status-updated', {
+      ticketId: ticketId,
+      isAiActive: status,
+    });
+
+    // Tetap gunakan ini agar Next.js membersihkan cache server-side
+    revalidatePath("/dashboard_admin");
+
+    return { success: true, data: updated };
+  } catch (error) {
+    console.error("Gagal update status AI:", error);
+    return { success: false };
   }
 }
