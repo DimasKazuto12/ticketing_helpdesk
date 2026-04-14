@@ -9,7 +9,7 @@ export default function SessionTimeout() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     
     // Gunakan 10 detik untuk testing (10 * 1000)
-    const TIMEOUT_IN_MS = 10 * 1000; 
+    const TIMEOUT_IN_MS = 5 * 60 * 1000; 
 
     const logout = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);

@@ -10,7 +10,7 @@ import {
     Activity, ShieldCheck, Zap, Clock, User, Paperclip, Hash, Calendar, Layers, Maximize2, MessageSquare, Send, Trash2, Edit3, UserPlus, Users
 } from 'lucide-react';
 import { getAdminDashboardData, analyzeTicketWithAI, getAllTickets, logoutAction, updateTicket, deleteTicket, sendReplyAction, addAdminAction, getAdminProfile, deleteAdminAction, getAdminsAction } from './action';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import "./admin.module.css"
 import { useRouter } from "next/navigation";
 import XLSX from 'xlsx-js-style';
@@ -23,6 +23,7 @@ import AiBubble from '@/components/aiBubble'
 
 interface ChatMessage {
     role: 'user' | 'admin';
+    isAi?: boolean;
     content: string;
 }
 
@@ -427,29 +428,45 @@ export default function AdminDashboard() {
     });
 
     const handleDelete = async (id: number) => {
-        // Gunakan toast konfirmasi atau window.confirm
-        if (!confirm("Konfirmasi penghapusan data dari Neural Database?")) return;
+        toast.warning("Pengehapusan Data", {
+            description: "Apakah yakin ingin menghapus tiket?",
+            duration: Infinity,
+            action: {
+                label: "Ya",
+                onClick: async () => {
+                    const toastId = toast.loading("Menunggu...");
+                    try {
+                        const result = await deleteTicket(id);
+                        if (result.success) {
+                            setTickets(prev => prev.filter(t => t.id !== id));
 
-        const toastId = toast.loading("Wiping record from system...");
-        try {
-            // Panggil fungsi server action/API kamu
-            const result = await deleteTicket(id);
+                            // Refresh Stats
+                            const updatedStats = await getAdminDashboardData();
+                            setData(updatedStats);
 
-            if (result.success) {
-                // Update state lokal agar data langsung hilang dari UI (Optimistic Update)
-                setTickets(prev => prev.filter(t => t.id !== id));
-
-                // Refresh data statistik (stats) agar jumlah tiket berkurang
-                const updatedStats = await getAdminDashboardData();
-                setData(updatedStats);
-
-                toast.success("Record Purged Successfully", { id: toastId });
-            } else {
-                toast.error("Failed to delete: " + result.error, { id: toastId });
-            }
-        } catch (error) {
-            toast.error("Security Override: Critical Delete Failure", { id: toastId });
-        }
+                            toast.success("Berhasil", {
+                                description: "Tiket berhasil dihapus dari sistem",
+                                id: toastId
+                            });
+                        } else {
+                            toast.error("Gagal", {
+                                description: result.error || "Tiket tidak bisa dihapus",
+                                id: toastId
+                            });
+                        }
+                    } catch (error) {
+                        toast.error("Error", {
+                            description: "Sistem sedang sibuk",
+                            id: toastId
+                        });
+                    }
+                },
+            },
+            cancel: {
+                label: "Tidak",
+                onClick: () => toast.dismiss(),
+            },
+        });
     };
 
     const handleDownloadExcel = () => {
@@ -570,18 +587,40 @@ export default function AdminDashboard() {
     const initialEmail = admin?.email ? admin.email.charAt(0).toUpperCase() : "?";
 
     const handleDeleteAdmin = async (id: number) => {
-        if (!confirm("Revoke admin access?")) return;
-
-        // Pastikan memanggil deleteAdminAction, BUKAN getAdminsAction
-        const res = await deleteAdminAction(id);
-
-        // Cek property success dari object 'res'
-        if (res && res.success) {
-            toast.success("Admin node de-synchronized");
-            setAdmins(prev => prev.filter(admin => admin.id !== id));
-        } else {
-            toast.error("Gagal menghapus admin");
-        }
+        toast.warning("Penghapusan Admin", {
+            description: "Apakah anda yakin ingin menghapus akun ini?",
+            duration: Infinity,
+            action: {
+                label: "Iya",
+                onClick: async () => {
+                    const toastId = toast.loading("Memproses...");
+                    try {
+                        const res = await deleteAdminAction(id);
+                        if (res && res.success) {
+                            toast.success("Berhasil", {
+                                description: "Akun admin berhasil dihapus",
+                                id: toastId
+                            });
+                            setAdmins(prev => prev.filter(admin => admin.id !== id));
+                        } else {
+                            toast.error("Gagal", {
+                                description: "Gagal menghapus akun admin",
+                                id: toastId
+                            });
+                        }
+                    } catch (error) {
+                        toast.error("Error", {
+                            description: "Sistem sedang sibuk",
+                            id: toastId
+                        });
+                    }
+                },
+            },
+            cancel: {
+                label: "Tidak",
+                onClick: () => toast.dismiss(),
+            },
+        });
     };
 
     return (
@@ -759,6 +798,19 @@ export default function AdminDashboard() {
                         </div>
                     ) : activeTab === 'tickets' ? (
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <Toaster
+                                theme="dark"
+                                position="top-center"
+                                toastOptions={{
+                                    style: {
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '16px',
+                                        color: '#fff',
+                                    },
+                                }}
+                            />
                             <div className="flex items-center justify-between mb-10">
 
                                 <div>
@@ -895,7 +947,21 @@ export default function AdminDashboard() {
                         </div>
 
                     ) : activeTab === 'manage_admin' ? (
+
                         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <Toaster
+                                theme="dark"
+                                position="top-center"
+                                toastOptions={{
+                                    style: {
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '16px',
+                                        color: '#fff',
+                                    },
+                                }}
+                            />
                             {/* Header Section */}
                             <div className="flex items-center justify-between mb-10">
                                 <div>
@@ -1065,8 +1131,12 @@ export default function AdminDashboard() {
                                 {/* Area di mana chat seharusnya muncul */}
                                 <div className="p-7 space-y-4">
                                     {selectedTicket?.replies?.map((msg: any, index: number) => {
+                                        console.log("Pesan dari:", msg.role, "Is AI?", msg.isAi);
                                         // 1. CEK APAKAH INI CHAT DARI AI
-                                        if (msg.senderType === 'bot' || msg.senderType === 'ai') {
+                                        const isAi = msg.senderType === 'bot' || msg.senderType === 'ai' || msg.isAi === true;
+                                        const isAdmin = msg.senderType === 'admin';
+
+                                        if (isAi) {
                                             return (
                                                 <AiBubble
                                                     key={index}
@@ -1078,10 +1148,10 @@ export default function AdminDashboard() {
 
                                         // 2. CHAT MANUSIA (ADMIN ATAU CLIENT)
                                         return (
-                                            <div key={index} className={`flex w-full mb-10 ${msg.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[80%] p-3 rounded-lg ${msg.senderType === 'admin' ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-zinc-800/50 border border-zinc-700/50'}`}>
+                                            <div key={index} className={`flex w-full mb-10 ${isAdmin ? 'justify-end' : 'justify-end'}`}>
+                                                <div className={`max-w-[80%] p-3 rounded-lg ${isAdmin ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-zinc-800/50 border border-zinc-700/50'}`}>
                                                     <p className="text-[10px] uppercase opacity-50 mb-2">
-                                                        {msg.senderType === 'admin' ? 'ADMIN_RESPONSE' : 'CLIENT_REQUEST'}
+                                                        {isAdmin ? 'ADMIN_RESPONSE' : 'CLIENT_REQUEST'}
                                                     </p>
 
                                                     {/* ATTACHMENT */}

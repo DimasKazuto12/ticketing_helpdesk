@@ -1,56 +1,183 @@
 import {
-  Body, Container, Head, Heading, Hr, Html, Preview, Section, Text, Button, Link
+  Body, Container, Head, Heading, Hr, Html, Preview, Section, Text, Button, Link, Img
 } from "@react-email/components";
 import * as React from "react";
 
 export const TicketCreatedEmail = ({ ticketCode, title }: { ticketCode: string, title: string }) => (
   <Html>
     <Head />
-    <Preview>Laporan Anda dengan kode {ticketCode} telah diterima.</Preview>
+    <Preview>Mission Control: Tiket {ticketCode} Berhasil Diverifikasi</Preview>
     <Body style={main}>
       <Container style={container}>
+        {/* Glow Top Accent */}
+        <Section style={topAccent} />
+
         <Section style={header}>
-          <Text style={logo}>DISTALK PROTOCOL</Text>
-        </Section>
-        <Heading style={h1}>Tiket Berhasil Dibuat</Heading>
-        <Text style={text}>
-          Halo, laporan Anda mengenai <strong>"{title}"</strong> telah berhasil kami terima dalam sistem.
-        </Text>
-        
-        <Section style={codeBox}>
-          <Text style={codeLabel}>NOMOR TIKET UNIK ANDA</Text>
-          <Text style={codeValue}>{ticketCode}</Text>
+          <Text style={logo}>
+            <span style={logoIcon}>◈</span> DISTALK <span style={logoBold}>PROTOCOL</span>
+          </Text>
         </Section>
 
-        <Section style={buttonContainer}>
-          <Button style={button} href={`${process.env.NEXT_RESPONSIVE_URL}/track_ticket`}>
-            Lacak Status Tiket
-          </Button>
+        <Section style={contentSection}>
+          <Heading style={h1}>System Entry Confirmed</Heading>
+          <Text style={text}>
+            Halo, laporan Anda mengenai <span style={highlight}>"{title}"</span> telah berhasil di-enkripsi dan masuk ke dalam antrean prioritas kami.
+          </Text>
+          
+          <Section style={codeBox}>
+            <Text style={codeLabel}>UNIQUE ACCESS KEY</Text>
+            <Text style={codeValue}>{ticketCode}</Text>
+          </Section>
+
+          <Section style={buttonContainer}>
+            <Button style={button} href={`${process.env.NEXT_RESPONSIVE_URL}/track_ticket`}>
+              INITIALIZE TRACKING
+            </Button>
+          </Section>
+
+          <Text style={subText}>
+            Gunakan akses kunci di atas untuk memantau status sistem. Anda akan menerima notifikasi otomatis jika ada pembaruan dari Neural Core kami.
+          </Text>
         </Section>
 
-        <Text style={text}>
-          Simpan nomor tiket ini untuk memantau perkembangan laporan Anda. Anda akan menerima email lagi jika admin memberikan balasan.
-        </Text>
         <Hr style={hr} />
-        <Text style={footer}>
-          Ini adalah email otomatis. Mohon tidak membalas email ini secara langsung.
-        </Text>
+        
+        <Section style={footerSection}>
+          <Text style={footerText}>
+            © 2026 Distalk Protocol — Automated Intelligence Response
+          </Text>
+          <Text style={footerSubText}>
+            Security Level: Class-A Encrypted System
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
 );
 
-// --- STYLING (In-line CSS untuk Email) ---
-const main = { backgroundColor: "#f6f9fc", fontFamily: 'HelveticaNeue,Helvetica,Arial,sans-serif' };
-const container = { backgroundColor: "#ffffff", border: "1px solid #e1e1e1", borderRadius: "8px", margin: "0 auto", padding: "40px", maxWidth: "600px" };
-const header = { borderBottom: "1px solid #eee", marginBottom: "20px" };
-const logo = { fontSize: "14px", fontWeight: "bold", color: "#3b82f6", letterSpacing: "1px" };
-const h1 = { color: "#1a1a1a", fontSize: "24px", fontWeight: "bold", margin: "30px 0" };
-const text = { color: "#444", fontSize: "16px", lineHeight: "26px" };
-const codeBox = { background: "#f4f4f5", borderRadius: "4px", padding: "20px", textAlign: "center" as const, margin: "20px 0" };
-const codeLabel = { fontSize: "12px", color: "#71717a", margin: "0 0 5px 0" };
-const codeValue = { fontSize: "32px", fontWeight: "bold", color: "#18181b", letterSpacing: "4px", margin: "0" };
-const buttonContainer = { textAlign: "center" as const, margin: "30px 0" };
-const button = { backgroundColor: "#2563eb", borderRadius: "5px", color: "#fff", fontSize: "16px", fontWeight: "bold", textDecoration: "none", textAlign: "center" as const, display: "block", padding: "12px" };
-const hr = { borderColor: "#eeeeee", margin: "40px 0" };
-const footer = { color: "#8898aa", fontSize: "12px", textAlign: "center" as const };
+// --- FUTURISTIC STYLING ---
+const main = {
+  backgroundColor: "#09090b", // Dark Zinc
+  fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  padding: "40px 0",
+};
+
+const container = {
+  backgroundColor: "#18181b", // Darker Zinc
+  border: "1px solid #27272a",
+  borderRadius: "16px",
+  margin: "0 auto",
+  maxWidth: "600px",
+  overflow: "hidden",
+};
+
+const topAccent = {
+  background: "linear-gradient(to right, #3b82f6, #8b5cf6)",
+  height: "6px",
+  width: "100%",
+};
+
+const header = {
+  padding: "30px",
+  textAlign: "center" as const,
+};
+
+const logo = {
+  fontSize: "16px",
+  color: "#a1a1aa",
+  letterSpacing: "3px",
+  margin: "0",
+};
+
+const logoBold = { color: "#ffffff", fontWeight: "bold" };
+const logoIcon = { color: "#3b82f6", marginRight: "8px" };
+
+const contentSection = { padding: "0 40px 40px 40px" };
+
+const h1 = {
+  color: "#ffffff",
+  fontSize: "28px",
+  fontWeight: "bold",
+  textAlign: "center" as const,
+  margin: "20px 0",
+  textTransform: "uppercase" as const,
+  letterSpacing: "1px",
+};
+
+const text = {
+  color: "#a1a1aa",
+  fontSize: "16px",
+  lineHeight: "28px",
+  textAlign: "center" as const,
+};
+
+const highlight = { color: "#60a5fa", fontWeight: "bold" };
+
+const codeBox = {
+  background: "linear-gradient(145deg, #27272a 0%, #18181b 100%)",
+  border: "1px border-solid #3f3f46",
+  borderRadius: "12px",
+  padding: "30px",
+  textAlign: "center" as const,
+  margin: "30px 0",
+};
+
+const codeLabel = {
+  fontSize: "11px",
+  color: "#71717a",
+  letterSpacing: "2px",
+  margin: "0 0 10px 0",
+  fontWeight: "bold",
+};
+
+const codeValue = {
+  fontSize: "36px",
+  fontWeight: "bold",
+  color: "#ffffff",
+  letterSpacing: "8px",
+  margin: "0",
+  fontFamily: "monospace",
+};
+
+const buttonContainer = { textAlign: "center" as const, margin: "35px 0" };
+
+const button = {
+  backgroundColor: "#3b82f6",
+  backgroundImage: "linear-gradient(to right, #2563eb, #3b82f6)",
+  borderRadius: "8px",
+  color: "#ffffff",
+  fontSize: "14px",
+  fontWeight: "bold",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "inline-block",
+  padding: "16px 32px",
+  boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
+};
+
+const subText = {
+  color: "#71717a",
+  fontSize: "14px",
+  lineHeight: "22px",
+  textAlign: "center" as const,
+  fontStyle: "italic",
+};
+
+const hr = { borderColor: "#27272a", margin: "0" };
+
+const footerSection = { padding: "30px", backgroundColor: "#0f0f12" };
+
+const footerText = {
+  color: "#52525b",
+  fontSize: "12px",
+  textAlign: "center" as const,
+  margin: "0",
+};
+
+const footerSubText = {
+  color: "#3f3f46",
+  fontSize: "10px",
+  textAlign: "center" as const,
+  marginTop: "5px",
+  letterSpacing: "1px",
+};

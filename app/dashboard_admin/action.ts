@@ -421,21 +421,131 @@ export async function getAdminsAction() {
   }
 }
 
+export async function chatWithNeuralAI(
+  userMessage: string,
+  attachment?: string,
+  history: any[] = [],
+  ticketBaseInfo?: { title: string; description: string }
+) {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+
+  // 1. Susun Riwayat Chat agar AI ingat percakapan sebelumnya
+  const chatContext = history.length > 0
+    ? history.map(h => `${h.senderType === 'client' ? 'User' : 'Assistant'}: ${h.message}`).join("\n")
+    : "Ini adalah awal percakapan.";
+
+  // 2. System Prompt yang lebih fleksibel dan mendukung Vision
+  const systemPrompt = `Anda adalah "Neural Chatbot" pada sistem IT Helpdesk.
+  
+  KONTEKS TIKET SAAT INI:
+  - Masalah Utama: ${ticketBaseInfo?.title || "Umum"}
+  - Penjelasan Awal: ${ticketBaseInfo?.description || "Tidak ada"}
+
+  RIWAYAT PERCAKAPAN SEBELUMNYA:
+  ${chatContext}
+
+  INSTRUKSI TUGAS:
+  1. Analisis pesan terbaru dari user dan gambar yang dilampirkan (jika ada).
+  2. Hubungkan apa yang terlihat di gambar dengan keluhan user.
+  3. Jika user bertanya hal teknis seperti "kelipet", hubungkan dengan kabel fiber optik atau tembaga.
+  4. Berikan jawaban yang solutif, singkat, dan profesional.
+
+  WAJIB OUTPUT JSON:
+  { "summary": "[Jawaban Anda]", "recommendedCategory": "Chat", "priority": "Low" }`;
+
+  // --- LOGIKA FETCH GEMINI (Multimodal: Teks + Gambar) ---
+  if (attachment && geminiKey) {
+    try {
+      // Gunakan model 1.5-flash untuk vision yang lebih stabil
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`;
+
+      let base64Image = "";
+      let mimeType = "image/jpeg";
+
+      // LOGIKA SAMA DENGAN ANALYZE TICKET (Deteksi MimeType Otomatis)
+      if (attachment.startsWith("data:")) {
+        const parts = attachment.split(",");
+        if (parts.length > 1) {
+          base64Image = parts[1];
+          const match = attachment.match(/data:(.*);base64/);
+          mimeType = match ? match[1] : "image/jpeg";
+        }
+      } else {
+        // Jika input berupa URL
+        const imageResponse = await fetch(attachment);
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        base64Image = Buffer.from(arrayBuffer).toString("base64");
+        mimeType = imageResponse.headers.get("content-type") || "image/jpeg";
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: `${systemPrompt}\n\nUSER MESSAGE: "${userMessage}"\n(Lihat dan analisa gambar berikut untuk menjawab)` },
+              { inline_data: { mime_type: mimeType, data: base64Image } }
+            ]
+          }],
+          generationConfig: { 
+            response_mime_type: "application/json",
+            temperature: 0.7 
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return JSON.parse(data.candidates[0].content.parts[0].text);
+      }
+    } catch (err) { 
+      console.error("❌ Gemini Vision Chat Error:", err); 
+    }
+  }
+
+  // --- LOGIKA FETCH GROQ (Fallback: Hanya Teks) ---
+  if (groqKey) {
+    try {
+      const completion = await groq.chat.completions.create({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage }
+        ],
+        model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" },
+      });
+      return JSON.parse(completion.choices[0]?.message?.content || "{}");
+    } catch (err) {
+      console.error("❌ Groq Chat Error:", err);
+    }
+  }
+
+  return { summary: "Maaf, sistem Neural sedang mengalami gangguan koneksi." };
+}
+
 // --- FUNGSI AUTO-REPLY NEURAL ---
 export async function autoAiReplyAction(ticketId: number, userMessage: string, userAttachment?: string) {
   try {
     // 1. Kirim sinyal "Neural is typing" ke Pusher agar User melihat animasi gelembung
     await pusherServer.trigger(`ticket-${ticketId}`, 'client-typing', { typing: true });
 
-    // 2. Minta AI menganalisis masalah (Gemini/Groq)
-    const aiAnalysis = await analyzeTicketWithAI(userMessage, userAttachment);
+    const history = await prisma.ticketReply.findMany({
+      where: { ticketId: ticketId },
+      orderBy: { createdAt: "asc" },
+      take: 4,
+    });
+
+    // Panggil chatbot murni analisa chat
+    const aiResponse = await chatWithNeuralAI(userMessage, userAttachment, history);
 
     // 3. Simpan jawaban AI ke Database sebagai 'admin' dengan penanda isAi: true
     const botReply = await prisma.ticketReply.create({
       data: {
         ticketId: ticketId,
-        message: aiAnalysis.summary,
-        senderType: "admin",
+        message: aiResponse.summary,
+        senderType: "bot",
         isAi: true, // Pastikan kamu sudah migrate schema ini tadi
       },
     });

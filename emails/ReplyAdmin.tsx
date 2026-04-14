@@ -3,53 +3,170 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-// Perhatikan: Kita ganti 'title' menjadi 'replyMessage'
 export const AdminReplyEmail = ({ ticketCode, replyMessage }: { ticketCode: string, replyMessage: string }) => (
   <Html>
     <Head />
-    <Preview>Admin telah membalas tiket Anda [{ticketCode}]</Preview>
+    <Preview>Response Detected: Admin telah menanggapi tiket Anda [{ticketCode}]</Preview>
     <Body style={main}>
       <Container style={container}>
+        {/* Glow Top Accent - Sesuai dengan desain sebelumnya */}
+        <Section style={topAccent} />
+
         <Section style={header}>
-          <Text style={logo}>DISTALK PROTOCOL</Text>
-        </Section>
-        <Heading style={h1}>Ada Balasan Baru</Heading>
-        <Text style={text}>
-          Halo, Admin kami baru saja menanggapi laporan Anda <strong>{ticketCode}</strong>:
-        </Text>
-        
-        {/* Box untuk menampilkan cuplikan pesan dari admin */}
-        <Section style={messageBox}>
-          <Text style={messageLabel}>PESAN DARI ADMIN:</Text>
-          <Text style={messageContent}>{replyMessage}</Text>
+          <Text style={logo}>
+            <span style={logoIcon}>◈</span> DISTALK <span style={logoBold}>PROTOCOL</span>
+          </Text>
         </Section>
 
-        <Section style={buttonContainer}>
-          <Button style={button} href={`${process.env.NEXT_PUBLIC_APP_URL}/results/${ticketCode}`}>
-            Lihat & Balas Chat
-          </Button>
+        <Section style={contentSection}>
+          <Heading style={h1}>Balasan Terbaru</Heading>
+          
+          <Text style={text}>
+            Sistem kami mendeteksi balasan baru dari Admin untuk tiket dengan enkripsi ID: <span style={highlight}>{ticketCode}</span>
+          </Text>
+          
+          {/* Futuristic Message Box */}
+          <Section style={messageBox}>
+            <Text style={messageLabel}>ENCRYPTED MESSAGE CONTENT</Text>
+            <Text style={messageContent}>"{replyMessage}"</Text>
+          </Section>
+
+          <Section style={buttonContainer}>
+            <Button style={button} href={`${process.env.NEXT_RESPONSIVE_URL}/results/${ticketCode}`}>
+              OPEN SECURE CHANNEL
+            </Button>
+          </Section>
+
+          <Text style={subText}>
+            Klik tombol di atas untuk masuk ke ruang percakapan terenkripsi dan memberikan respons balik.
+          </Text>
         </Section>
 
         <Hr style={hr} />
-        <Text style={footer}>
-          ID Tiket: {ticketCode} | Silakan klik tombol di atas untuk masuk ke ruang percakapan.
-        </Text>
+        
+        <Section style={footerSection}>
+          <Text style={footerText}>
+            © 2026 Distalk Protocol — Neural Response Interface
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
 );
 
-// --- STYLING ---
-const main = { backgroundColor: "#f6f9fc", fontFamily: 'HelveticaNeue,Helvetica,Arial,sans-serif' };
-const container = { backgroundColor: "#ffffff", borderRadius: "8px", margin: "0 auto", padding: "40px", maxWidth: "600px" };
-const header = { borderBottom: "1px solid #eee", marginBottom: "20px" };
-const logo = { fontSize: "14px", fontWeight: "bold", color: "#3b82f6", letterSpacing: "1px" };
-const h1 = { color: "#1a1a1a", fontSize: "22px", fontWeight: "bold" };
-const text = { color: "#444", fontSize: "16px", lineHeight: "24px" };
-const messageBox = { background: "#f8fafc", borderLeft: "4px solid #3b82f6", padding: "15px 20px", margin: "20px 0" };
-const messageLabel = { fontSize: "11px", fontWeight: "bold", color: "#64748b", marginBottom: "8px" };
-const messageContent = { fontSize: "15px", color: "#1e293b", margin: "0", fontStyle: "italic" };
-const buttonContainer = { textAlign: "center" as const, margin: "30px 0" };
-const button = { backgroundColor: "#2563eb", borderRadius: "5px", color: "#fff", fontSize: "15px", fontWeight: "bold", textDecoration: "none", textAlign: "center" as const, display: "block", padding: "12px" };
-const hr = { borderColor: "#eeeeee", margin: "30px 0" };
-const footer = { color: "#8898aa", fontSize: "12px", textAlign: "center" as const };
+// --- FUTURISTIC STYLING (MATCHING THE THEME) ---
+const main = {
+  backgroundColor: "#09090b",
+  fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  padding: "40px 0",
+};
+
+const container = {
+  backgroundColor: "#18181b",
+  border: "1px solid #27272a",
+  borderRadius: "16px",
+  margin: "0 auto",
+  maxWidth: "600px",
+  overflow: "hidden",
+};
+
+const topAccent = {
+  background: "linear-gradient(to right, #3b82f6, #8b5cf6)",
+  height: "6px",
+  width: "100%",
+};
+
+const header = {
+  padding: "30px",
+  textAlign: "center" as const,
+};
+
+const logo = {
+  fontSize: "16px",
+  color: "#a1a1aa",
+  letterSpacing: "3px",
+  margin: "0",
+};
+
+const logoBold = { color: "#ffffff", fontWeight: "bold" };
+const logoIcon = { color: "#3b82f6", marginRight: "8px" };
+
+const contentSection = { padding: "0 40px 40px 40px" };
+
+const h1 = {
+  color: "#ffffff",
+  fontSize: "26px",
+  fontWeight: "bold",
+  textAlign: "center" as const,
+  margin: "20px 0",
+  textTransform: "uppercase" as const,
+  letterSpacing: "2px",
+};
+
+const text = {
+  color: "#a1a1aa",
+  fontSize: "15px",
+  lineHeight: "26px",
+  textAlign: "center" as const,
+};
+
+const highlight = { color: "#60a5fa", fontWeight: "bold", fontFamily: "monospace" };
+
+const messageBox = {
+  background: "linear-gradient(145deg, #27272a 0%, #1c1c1f 100%)",
+  borderLeft: "4px solid #3b82f6",
+  borderRadius: "0 12px 12px 0",
+  padding: "25px",
+  margin: "30px 0",
+};
+
+const messageLabel = {
+  fontSize: "10px",
+  color: "#71717a",
+  letterSpacing: "2px",
+  margin: "0 0 12px 0",
+  fontWeight: "bold",
+};
+
+const messageContent = {
+  fontSize: "16px",
+  lineHeight: "24px",
+  color: "#e4e4e7",
+  margin: "0",
+  fontStyle: "italic",
+};
+
+const buttonContainer = { textAlign: "center" as const, margin: "35px 0" };
+
+const button = {
+  backgroundColor: "#3b82f6",
+  backgroundImage: "linear-gradient(to right, #2563eb, #3b82f6)",
+  borderRadius: "8px",
+  color: "#ffffff",
+  fontSize: "13px",
+  fontWeight: "bold",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "inline-block",
+  padding: "16px 32px",
+  letterSpacing: "1px",
+  boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
+};
+
+const subText = {
+  color: "#71717a",
+  fontSize: "13px",
+  lineHeight: "20px",
+  textAlign: "center" as const,
+};
+
+const hr = { borderColor: "#27272a", margin: "0" };
+
+const footerSection = { padding: "30px", backgroundColor: "#0f0f12" };
+
+const footerText = {
+  color: "#52525b",
+  fontSize: "11px",
+  textAlign: "center" as const,
+  margin: "0",
+};

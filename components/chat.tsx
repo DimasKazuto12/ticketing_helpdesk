@@ -5,12 +5,14 @@ import styles from '../app/results/[code]/results.module.css';
 import VoiceController from './VoiceController';
 import Pusher from 'pusher-js';
 import { useRouter } from 'next/navigation';
+import AiBubble from '@/components/aiBubble';
 
 interface Reply {
     id: number;
     ticketId: number;
     userId?: number | null;
-    senderType: 'admin' | 'client'; // Harus sinkron dengan enum SenderType
+    senderType: 'admin' | 'client' | 'bot'; // Harus sinkron dengan enum SenderType
+    isAi?: boolean;
     message: string;
     attachment?: string | null;
     createdAt: string | Date;
@@ -137,7 +139,7 @@ export default function ChatInterface({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
+            if (file.size > 10 * 1024 * 1024) {
                 alert("File too large! Max 2MB.");
                 return;
             }
@@ -172,58 +174,82 @@ export default function ChatInterface({
                 )}
 
                 {/* 3. REPLIES MAPPING */}
-                {replies.map((r, i) => (
-                    <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${r.senderType === 'client'
-                            ? 'bg-zinc-800/50 border border-zinc-700/50'
-                            : 'bg-blue-600/20 border border-blue-500/30'
-                            }`}>
-                            <p className="text-[10px] uppercase opacity-50 tracking-wider font-bold mb-2">
-                                {r.senderType === 'client' ? 'CLIENT_REPLY' : 'ADMIN_RESPONSE'}
-                            </p>
+                {/* 3. REPLIES MAPPING */}
+                {replies.map((r: any, i: number) => {
+                    // 1. CEK APAKAH INI CHAT DARI AI
+                    const isAi = r.senderType === 'bot' || r.senderType === 'ai' || r.isAi === true;
+                    const isAdmin = r.senderType === 'admin';
 
-                            {r.attachment && (
-                                <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/20">
-                                    <img
-                                        src={r.attachment}
-                                        alt="Neural Attachment"
-                                        className="max-w-full h-auto max-h-[300px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
-                                        onClick={() => setSelectedImage(r.attachment ?? null)}
-                                    />
-                                </div>
-                            )}
-
-                            {r.message && (
-                                <p className="text-sm text-zinc-100 leading-relaxed break-words">
-                                    {r.message}
-                                </p>
-                            )}
-
-                            {/* TIMESTAMP DENGAN FIX HYDRATION */}
-                            <p
-                                suppressHydrationWarning
-                                className="text-[8px] mt-2 opacity-30 text-right font-mono"
-                            >
-                                {isMounted ? new Date(r.createdAt || Date.now()).toLocaleTimeString([], {
+                    // JIKA AI: Gunakan komponen AiBubble buatanmu
+                    if (isAi) {
+                        return (
+                            <AiBubble
+                                key={i}
+                                message={r.message}
+                                timestamp={isMounted ? new Date(r.createdAt || Date.now()).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 }) : '--:--'}
-                            </p>
+                            />
+                        );
+                    }
+
+                    // 2. CHAT MANUSIA (ADMIN ATAU CLIENT)
+                    return (
+                        <div key={i} className={`flex w-full mb-4 ${r.senderType === 'client' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] p-3 rounded-lg shadow-lg transition-all ${r.senderType === 'client'
+                                ? 'bg-zinc-800/50 border border-zinc-700/50'
+                                : 'bg-blue-600/20 border border-blue-500/30'
+                                }`}>
+                                <p className="text-[10px] uppercase opacity-50 tracking-wider font-bold mb-2">
+                                    {isAdmin ? 'ADMIN_RESPONSE' : 'CLIENT_REPLY'}
+                                </p>
+
+                                {/* ATTACHMENT */}
+                                {r.attachment && (
+                                    <div className="mb-2 rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/20">
+                                        <img
+                                            src={r.attachment}
+                                            alt="Attachment"
+                                            className="max-w-full h-auto max-h-[300px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => setSelectedImage(r.attachment ?? null)}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* PESAN TEKS */}
+                                {r.message && (
+                                    <p className="text-sm text-zinc-100 leading-relaxed break-words">
+                                        {r.message}
+                                    </p>
+                                )}
+
+                                {/* TIMESTAMP */}
+                                <p
+                                    suppressHydrationWarning
+                                    className="text-[8px] mt-2 opacity-30 text-right font-mono"
+                                >
+                                    {isMounted ? new Date(r.createdAt || Date.now()).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) : '--:--'}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* INPUT SECTION */}
             <div className={styles.inputWrapper}>
-                {attachment && (
-                    <div className="relative mb-2 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                            <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
-                            <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
+                    {attachment && (
+                        <div className="relative mb-2 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
+                            <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
+                                <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
+                                <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
                 <div className={styles.inputBar}>
                     <input
