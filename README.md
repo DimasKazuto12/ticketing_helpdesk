@@ -1,10 +1,12 @@
-# ⚡ Distalk Protocol v.2.0 – IT Helpdesk System
+### ⚡ Distalk Protocol v.2.0 – IT Helpdesk System
 
 **Distalk Protocol** adalah platform manajemen tiket IT Helpdesk modern yang dibangun secara Full-Stack menggunakan **Next.js**. Project ini dirancang untuk efisiensi komunikasi antara Client dan Admin teknis dengan estetika "Cyber-Industrial".
 
 ---
 
-## 🚀 Fitur Unggulan
+
+
+#### 🚀 Fitur Unggulan
 
 - **Neural Visual Feed:** Dashboard admin terintegrasi untuk analisis data tiket secara real-time.
 - **Full-Stack Next.js Architecture:** Menggabungkan Frontend dan Backend (API Routes & Server Actions) dalam satu ekosistem yang efisien.
@@ -15,7 +17,9 @@
 
 ---
 
-## 🛠️ Stack Teknologi
+
+
+#### 🛠️ Stack Teknologi
 
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
 - **Language:** TypeScript
@@ -27,7 +31,9 @@
 
 ---
 
-## 🔌 Integrasi Layanan (Third-party Services)
+
+
+#### 🔌 Integrasi Layanan (Third-party Services)
 
 Untuk menghadirkan pengalaman skala industri, project ini terintegrasi dengan:
 
@@ -37,7 +43,9 @@ Untuk menghadirkan pengalaman skala industri, project ini terintegrasi dengan:
 
 ---
 
-## 📁 Struktur Folder
+
+
+#### 📁 Struktur Folder
 
 ```text
 ├── .next/                  # Build output dari Next.js
@@ -68,7 +76,9 @@ Untuk menghadirkan pengalaman skala industri, project ini terintegrasi dengan:
 
 ---
 
-## ⚙️ Konfigurasi Environment (.env)
+
+
+#### ⚙️ Konfigurasi Environment (.env)
 
 Buat file `.env` di root direktori dan isi dengan kredensial berikut:
 
@@ -113,7 +123,9 @@ VOICEVOX_API_URL=http://localhost:50021
 
 ---
 
-## 💻 Cara Menjalankan Project
+
+
+#### 💻 Cara Menjalankan Project
 
 Ikuti langkah-langkah berikut untuk menjalankan project di lingkungan lokal:
 
@@ -137,7 +149,9 @@ npm run dev
 ```
 Akses aplikasi melalui: http://localhost:3000
 
-## 🚀 Optimasi & Performa
+
+
+#### 🚀 Optimasi & Performa
 
 * **Server Actions**: Digunakan untuk pengolahan data di sisi server (seperti pada `action.ts`), yang secara signifikan mengurangi beban JavaScript di sisi browser.
 * **Image Optimization**: Memanfaatkan fitur `next/image` untuk memastikan pemuatan aset visual yang lebih ringan dan efisien.
@@ -145,7 +159,9 @@ Akses aplikasi melalui: http://localhost:3000
 
 ---
 
-## 👤 Kontak & Pengembang
+
+
+#### 👤 Kontak & Pengembang
 
 **Dimas Aditiya Pratama** *Aspiring Animator & Full-Stack Developer*
 
