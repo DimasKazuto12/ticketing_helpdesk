@@ -243,7 +243,7 @@ export default function ChatInterface({
             {/* INPUT SECTION */}
             <div className={styles.inputWrapper}>
                     {attachment && (
-                        <div className="relative mb-2 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
+                        <div className="absolute bottom-27 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
                             <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
                                 <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
                                 <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
