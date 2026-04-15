@@ -52,7 +52,6 @@ Untuk menghadirkan pengalaman skala industri, project ini terintegrasi dengan:
 ├── app/                    # Next.js App Router (Routing & Pages Utama)
 │   ├── api/                # Route Handlers untuk Backend API
 │   ├── dashboard_ad...     # Dashboard Khusus Admin
-│   ├── generated/          # File hasil generate otomatis
 │   ├── login/              # Halaman Login
 │   ├── register/           # Halaman Register
 │   ├── results/            # Halaman Hasil Tiket
