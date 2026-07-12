@@ -42,7 +42,7 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
         ticketCode: `TCK-${Math.floor(1000 + Math.random() * 9000)}`,
         clientName,
         clientEmail,
-        categoryId: categoryId, // ← pakai categoryId (number)
+        categoryId: categoryId,
         title,
         description,
         attachment: finalAttachment,
