@@ -36,28 +36,30 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
   }
 
   try {
-    // 🔥 PANGGIL API ROUTE (bukan localhost!)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ticketing-helpdesk.vercel.app/';
-    const response = await fetch(`${baseUrl}/api/ticket`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description,
+    // 2. KIRIM KE API INTERNAL (Sekarang aman dari Error 413!)
+    const ticket = await prisma.ticket.create({
+      data: {
+        ticketCode: `TCK-${Math.floor(1000 + Math.random() * 9000)}`,
         clientName,
         clientEmail,
-        categoryId: categoryId, // ← kirim sebagai number
+        categoryId: categoryId, // ← pakai categoryId (number)
+        title,
+        description,
         attachment: finalAttachment,
-        captchaToken,
-      }),
+        status: 'open',
+        priority: 'low',
+        updatedAt: new Date(),
+      },
     });
 
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Gagal mengirim tiket");
+    return {
+      success: true,
+      data: { ticketCode: ticket.ticketCode }
+    };
 
-    return { success: true, data: result.data };
   } catch (error: any) {
     console.error("ACTION_ERROR:", error.message);
+    console.error("Error Code:", error.code);
     return { success: false, error: error.message };
   }
 }
