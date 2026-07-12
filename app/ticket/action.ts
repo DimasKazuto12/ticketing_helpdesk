@@ -1,5 +1,6 @@
 "use server";
 import { v2 as cloudinary } from 'cloudinary';
+import prisma from '@/lib/prisma';
 
 // Pastikan config cloudinary ada di sini atau di file lib
 cloudinary.config({
@@ -12,16 +13,16 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
   const title = formData.get("subject") as string;
   const description = formData.get("description") as string;
   const clientName = formData.get("name") as string;
-  const clientEmail = formData.get("email") as string; 
-  const category = formData.get("category") as string;
-  
+  const clientEmail = formData.get("email") as string;
+  const categoryId = parseInt(formData.get("category") as string);
+
   const file = formData.get("attachment") as File;
   let finalAttachment = ""; // Ini akan berisi URL Cloudinary
 
   if (file && file.size > 0) {
     const buffer = await file.arrayBuffer();
     const base64File = `data:${file.type};base64,${Buffer.from(buffer).toString("base64")}`;
-    
+
     try {
       // 1. UPLOAD KE CLOUDINARY DULU
       const uploadRes = await cloudinary.uploader.upload(base64File, {
@@ -35,8 +36,9 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
   }
 
   try {
-    // 2. KIRIM KE API INTERNAL (Sekarang aman dari Error 413!)
-    const response = await fetch("http://localhost:3000/api/ticket", { 
+    // 🔥 PANGGIL API ROUTE (bukan localhost!)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ticketing-helpdesk.vercel.app/';
+    const response = await fetch(`${baseUrl}/api/ticket`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -44,8 +46,8 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
         description,
         clientName,
         clientEmail,
-        category,
-        attachment: finalAttachment, // Cuma URL pendek, misal: https://res.cloudinary.com/...
+        categoryId: categoryId, // ← kirim sebagai number
+        attachment: finalAttachment,
         captchaToken,
       }),
     });

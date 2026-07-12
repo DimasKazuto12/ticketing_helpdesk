@@ -131,7 +131,7 @@ const codeLabel = {
 };
 
 const codeValue = {
-  fontSize: "36px",
+  fontSize: "23px",
   fontWeight: "bold",
   color: "#ffffff",
   letterSpacing: "8px",
