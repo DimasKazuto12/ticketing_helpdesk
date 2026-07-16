@@ -98,7 +98,7 @@ export async function analyzeTicketWithAI(description: string, attachment?: stri
   if (attachment && geminiKey) {
     console.log("🚀 [DEBUG] Masuk ke blok Gemini...");
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiKey}`;
 
       let base64Image = "";
       let mimeType = "image/jpeg";
