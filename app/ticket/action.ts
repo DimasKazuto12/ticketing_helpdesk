@@ -16,6 +16,7 @@ export async function createTicket(formData: FormData, captchaToken: string | nu
   const clientEmail = formData.get("email") as string;
   const categoryId = parseInt(formData.get("category") as string);
 
+
   const file = formData.get("attachment") as File;
   let finalAttachment = ""; // Ini akan berisi URL Cloudinary
 

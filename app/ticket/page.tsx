@@ -35,10 +35,10 @@ export default function TicketPage() {
   };
 
   const categories = [
-    { id: '1', label: 'UI/UX Bug' },
+    { id: '1', label: 'UI/UX Bug'},
     { id: '2', label: 'Software' },
     { id: '3', label: 'Hardware' },
-    { id: '4', label: 'Other' },
+    { id: '4', label: 'Other'},
   ];
 
   async function handleSubmit(formData: FormData) {
@@ -58,8 +58,7 @@ export default function TicketPage() {
     const result = await createTicket(formData, token);
 
     if (result.success) {
-
-      if (!result.data || !result.data.ticketCode) {
+       if (!result.data || !result.data.ticketCode) {
         toast.error('Gagal Mengirim', {
           id: toastId,
           description: 'Data tiket tidak valid',
@@ -233,7 +232,7 @@ export default function TicketPage() {
                 )}
               </div>
               <button type="submit" disabled={isSending} className={styles.btnSubmit}>
-                {isSending ? "Memproses..." : "Kirim Tiket"}
+                 {isSending ? "Memproses..." : "Kirim Tiket"}
               </button>
             </div>
           </form>
