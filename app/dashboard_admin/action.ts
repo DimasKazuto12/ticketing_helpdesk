@@ -427,6 +427,11 @@ export async function chatWithNeuralAI(
   history: any[] = [],
   ticketBaseInfo?: { title: string; description: string }
 ) {
+  console.log("🔍 [AI] chatWithNeuralAI dipanggil");
+  console.log("🔍 [AI] attachment:", attachment);
+  console.log("🔍 [AI] GEMINI_API_KEY exists:", !!process.env.GEMINI_API_KEY);
+  console.log("🔍 [AI] GROQ_API_KEY exists:", !!process.env.GROQ_API_KEY);
+  
   const geminiKey = process.env.GEMINI_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
 
@@ -458,7 +463,7 @@ export async function chatWithNeuralAI(
   if (attachment && geminiKey) {
     try {
       // Gunakan model 1.5-flash untuk vision yang lebih stabil
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiKey}`;
 
       let base64Image = "";
       let mimeType = "image/jpeg";
