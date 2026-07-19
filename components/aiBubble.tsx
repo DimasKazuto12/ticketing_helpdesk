@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Bot, Sparkles } from 'lucide-react';
 
 interface AiBubbleProps {
@@ -8,6 +8,14 @@ interface AiBubbleProps {
 }
 
 export default function AiBubble({ message, timestamp }: AiBubbleProps) {
+     console.log("🤖 [AiBubble] RENDER:", { message, timestamp });
+
+    useEffect(() => {
+        // 🔥 LOG 2: Komponen mount
+        console.log("✅ [AiBubble] MOUNTED");
+        return () => console.log("❌ [AiBubble] UNMOUNTED");
+    }, []);
+
     return (
         <div className="flex flex-col gap-2 mb-6">
             {/* Label Identitas AI */}

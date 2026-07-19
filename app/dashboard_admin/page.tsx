@@ -1131,7 +1131,7 @@ export default function AdminDashboard() {
                                 {/* Area di mana chat seharusnya muncul */}
                                 <div className="p-7 space-y-4">
                                     {selectedTicket?.replies?.map((msg: any, index: number) => {
-                                        console.log("Pesan dari:", msg.role, "Is AI?", msg.isAi);
+                                        console.log("Pesan dari:", msg.senderType, "Is AI?", msg.isAi);
                                         // 1. CEK APAKAH INI CHAT DARI AI
                                         const isAi = msg.senderType === 'bot' || msg.senderType === 'ai' || msg.isAi === true;
                                         const isAdmin = msg.senderType === 'admin';

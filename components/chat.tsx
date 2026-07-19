@@ -66,9 +66,19 @@ export default function ChatInterface({
             cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
         });
 
+        pusher.connection.bind('connected', () => {
+            console.log("✅ Pusher connected to ticket channel");
+        });
+
+        pusher.connection.bind('error', (err: any) => {
+            console.error("❌ Pusher error:", err);
+        });
+
+
         const channel = pusher.subscribe(`ticket-${ticketId}`);
 
         channel.bind('new-reply', (data: Reply) => {
+            console.log("📡 new-reply received:", data);
             setReplies((prev) => {
                 // Cukup cek apakah ID pesan ini sudah ada di layar (cegah duplikat standar)
                 const isAlreadyThere = prev.some(r => r.id === data.id);
@@ -177,6 +187,12 @@ export default function ChatInterface({
                 {/* 3. REPLIES MAPPING */}
                 {replies.map((r: any, i: number) => {
                     // 1. CEK APAKAH INI CHAT DARI AI
+                    console.log(`📊 [Reply ${i}]:`, {
+                        senderType: r.senderType,
+                        isAi: r.isAi,
+                        message: r.message?.substring(0, 30),
+                        id: r.id
+                    });
                     const isAi = r.senderType === 'bot' || r.senderType === 'ai' || r.isAi === true;
                     const isAdmin = r.senderType === 'admin';
 
@@ -242,14 +258,14 @@ export default function ChatInterface({
 
             {/* INPUT SECTION */}
             <div className={styles.inputWrapper}>
-                    {attachment && (
-                        <div className="absolute bottom-27 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
-                            <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                                <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
-                                <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
-                            </div>
+                {attachment && (
+                    <div className="absolute bottom-27 p-2 bg-zinc-900 border border-zinc-800 rounded-2xl animate-in fade-in slide-in-from-bottom-2 w-fit">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
+                            <img src={attachment} className="w-full h-full object-cover" alt="preview" onClick={() => setSelectedImage(attachment)} />
+                            <button onClick={() => setAttachment(null)} className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"><X size={14} /></button>
                         </div>
-                    )}
+                    </div>
+                )}
 
                 <div className={styles.inputBar}>
                     <input
