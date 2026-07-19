@@ -20,6 +20,7 @@ interface Reply {
 
 interface ChatInterfaceProps {
     ticketId: number;
+    ticketCode: string;
     initialDescription: string;
     existingReplies: Reply[];
     aiSummary?: string;
@@ -28,6 +29,7 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({
     ticketId,
+    ticketCode,
     existingReplies,
     aiSummary,
     ticketStatus
@@ -46,7 +48,7 @@ export default function ChatInterface({
 
     const fetchData = async () => {
         try {
-            const res = await fetch(`/api/ticket/${ticketId}`);
+            const res = await fetch(`/api/ticket/${ticketCode}`);
             const data = await res.json();
             if (data?.replies) {
                 setReplies(data.replies);
