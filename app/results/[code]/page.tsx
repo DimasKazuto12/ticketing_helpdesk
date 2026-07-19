@@ -98,7 +98,6 @@ export default async function ProfessionalTicketResults({ params }: { params: { 
         */}
         <ChatInterface
           ticketId={ticket.id}
-          ticketCode={ticket.ticketCode}
           initialDescription={ticket.description}
           existingReplies={ticket.replies}
           aiSummary={ticket.aiSuggestions?.aiSummary}
