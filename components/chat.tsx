@@ -44,6 +44,18 @@ export default function ChatInterface({
     // SOLUSI HYDRATION: State untuk mengecek apakah sudah di client
     const [isMounted, setIsMounted] = useState(false);
 
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`/api/ticket/${ticketId}`);
+            const data = await res.json();
+            if (data?.replies) {
+                setReplies(data.replies);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+        }
+    };
+
     useEffect(() => {
         setReplies(existingReplies);
     }, [existingReplies]);
@@ -61,6 +73,9 @@ export default function ChatInterface({
     // Ganti bagian useEffect Pusher kamu dengan ini:
     useEffect(() => {
         if (!ticketId) return;
+
+        let isPusherConnected = false;
+        let interval: NodeJS.Timeout | null = null;
 
         const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
             cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
@@ -88,6 +103,23 @@ export default function ChatInterface({
                 return [...prev, data];
             });
         });
+
+        const startPolling = () => {
+            if (interval) return;
+            console.log('🔄 Polling started (Pusher fallback)');
+            interval = setInterval(() => {
+                fetchData();
+            }, 3000);
+        };
+
+          const timeout = setTimeout(() => {
+            if (!isPusherConnected) {
+                startPolling();
+            }
+        }, 5000);
+
+        // Fetch awal (refresh)
+        fetchData();
 
         channel.bind('ticket-updated', () => {
             // Ini akan memicu Server Component (ProfessionalTicketResults) 
@@ -129,6 +161,9 @@ export default function ChatInterface({
             });
 
             if (!res.ok) throw new Error("Gagal mengirim");
+            setTimeout(() => {
+                fetchData();
+            }, 1000);
 
             // --- STOP DI SINI ---
             // Kita tidak perlu memanggil setReplies. 
