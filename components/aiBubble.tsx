@@ -8,7 +8,6 @@ interface AiBubbleProps {
 }
 
 export default function AiBubble({ message, timestamp }: AiBubbleProps) {
-     console.log("🤖 [AiBubble] RENDER:", { message, timestamp });
 
     useEffect(() => {
         // 🔥 LOG 2: Komponen mount

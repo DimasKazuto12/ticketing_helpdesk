@@ -187,12 +187,7 @@ export default function ChatInterface({
                 {/* 3. REPLIES MAPPING */}
                 {replies.map((r: any, i: number) => {
                     // 1. CEK APAKAH INI CHAT DARI AI
-                    console.log(`📊 [Reply ${i}]:`, {
-                        senderType: r.senderType,
-                        isAi: r.isAi,
-                        message: r.message?.substring(0, 30),
-                        id: r.id
-                    });
+                   
                     const isAi = r.senderType === 'bot' || r.senderType === 'ai' || r.isAi === true;
                     const isAdmin = r.senderType === 'admin';
 
